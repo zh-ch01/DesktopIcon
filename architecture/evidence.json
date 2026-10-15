@@ -1,0 +1,1763 @@
+{
+  "metadata": {
+    "system": "DesktopIconToggle",
+    "viewLevel": [
+      "L1 system context",
+      "L2 container",
+      "L3 component"
+    ],
+    "generated": "2026-09-30",
+    "producedBy": "system-modeler + c4model + graphviz (via architecture-visualization:explore router)",
+    "sourceRoot": "D:/z/workspace/work3/DesktopIconToggle",
+    "sourceRefPolicy": "resolvable",
+    "note": "Every sourceRef is a real file:line plus an anchor token that must appear on that line. The gate is verify_refs.py."
+  },
+  "nodes": [
+    {
+      "id": "actor.user",
+      "label": "Desktop user",
+      "type": "actor",
+      "state": "current",
+      "confidence": "high",
+      "description": "Double-clicks empty desktop, uses tray icon and tray menu.",
+      "sourceRefs": [
+        {
+          "file": "README.md",
+          "line": 3,
+          "anchor": "托盘常驻"
+        }
+      ]
+    },
+    {
+      "id": "actor.script",
+      "label": "Scripts / hotkeys / Task Scheduler",
+      "type": "actor",
+      "state": "current",
+      "confidence": "high",
+      "description": "Invokes the exe with a command-line flag; does not need the background instance for show/hide/toggle.",
+      "sourceRefs": [
+        {
+          "file": "README.md",
+          "line": 28,
+          "anchor": "--toggle"
+        }
+      ]
+    },
+    {
+      "id": "actor.injected",
+      "label": "Injected input (SendInput, remote control)",
+      "type": "actor",
+      "state": "current",
+      "confidence": "high",
+      "description": "Produces synthetic mouse events the hook can detect and optionally reject.",
+      "sourceRefs": [
+        {
+          "file": "DesktopGestureHook.cs",
+          "line": 22,
+          "anchor": "LLMHF_ANY_INJECTED"
+        }
+      ]
+    },
+    {
+      "id": "sys.dit",
+      "label": "DesktopIconToggle",
+      "type": "system",
+      "state": "current",
+      "confidence": "high",
+      "description": "Single-exe Windows utility that toggles desktop icon visibility.",
+      "sourceRefs": [
+        {
+          "file": "DesktopIconToggle.csproj",
+          "line": 9,
+          "anchor": "DesktopIconToggle"
+        }
+      ]
+    },
+    {
+      "id": "container.exe",
+      "label": "DesktopIconToggle.exe",
+      "type": "container",
+      "state": "current",
+      "confidence": "high",
+      "description": ".NET 8 WinExe, x64, framework-dependent, asInvoker, no NuGet packages.",
+      "sourceRefs": [
+        {
+          "file": "DesktopIconToggle.csproj",
+          "line": 6,
+          "anchor": "WinExe"
+        },
+        {
+          "file": "DesktopIconToggle.csproj",
+          "line": 7,
+          "anchor": "net8.0"
+        },
+        {
+          "file": "app.manifest",
+          "line": 8,
+          "anchor": "asInvoker"
+        }
+      ]
+    },
+    {
+      "id": "proc.server",
+      "label": "Background instance (server role)",
+      "type": "container",
+      "state": "current",
+      "confidence": "high",
+      "description": "Holds the named mutex, owns the hidden message window, tray icon, and mouse hook; runs the message loop.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 62,
+          "anchor": "CreateMutexW"
+        },
+        {
+          "file": "Program.cs",
+          "line": 99,
+          "anchor": "GetMessageW"
+        }
+      ]
+    },
+    {
+      "id": "proc.cli",
+      "label": "One-shot CLI invocation (client role)",
+      "type": "container",
+      "state": "current",
+      "confidence": "high",
+      "description": "Same exe, args present, attaches a console and either acts directly on the icon layer or queries/commands the running instance.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 32,
+          "anchor": "AttachConsole"
+        },
+        {
+          "file": "Program.cs",
+          "line": 33,
+          "anchor": "ToLowerInvariant"
+        }
+      ]
+    },
+    {
+      "id": "comp.program",
+      "label": "Program",
+      "type": "module",
+      "state": "current",
+      "confidence": "high",
+      "description": "Entry point, argument dispatch, message loop, WndProc handler, tray menu, gesture decision, boot restore.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 30,
+          "anchor": "Main"
+        }
+      ]
+    },
+    {
+      "id": "comp.ipcwindow",
+      "label": "IpcWindow",
+      "type": "module",
+      "state": "current",
+      "confidence": "high",
+      "description": "0x0 offscreen visible top-level window: tray owner plus command-line IPC endpoint.",
+      "sourceRefs": [
+        {
+          "file": "IpcWindow.cs",
+          "line": 14,
+          "anchor": "ClassName"
+        }
+      ]
+    },
+    {
+      "id": "comp.trayicon",
+      "label": "TrayIcon",
+      "type": "module",
+      "state": "current",
+      "confidence": "high",
+      "description": "Shell notification area registration and icon extraction.",
+      "sourceRefs": [
+        {
+          "file": "TrayIcon.cs",
+          "line": 39,
+          "anchor": "NIM_ADD"
+        }
+      ]
+    },
+    {
+      "id": "comp.gesturehook",
+      "label": "DesktopGestureHook",
+      "type": "module",
+      "state": "current",
+      "confidence": "high",
+      "description": "WH_MOUSE_LL global hook; pairs raw button-ups into a double click, never allocates on the callback.",
+      "sourceRefs": [
+        {
+          "file": "DesktopGestureHook.cs",
+          "line": 52,
+          "anchor": "SetWindowsHookExW"
+        }
+      ]
+    },
+    {
+      "id": "comp.desktop",
+      "label": "Desktop",
+      "type": "module",
+      "state": "current",
+      "confidence": "high",
+      "description": "Icon-layer discovery, visibility read/write, desktop point classification, cross-process hit test.",
+      "sourceRefs": [
+        {
+          "file": "Desktop.cs",
+          "line": 91,
+          "anchor": "ShowWindowAsync"
+        }
+      ]
+    },
+    {
+      "id": "comp.remoteblock",
+      "label": "RemoteBlock",
+      "type": "module",
+      "state": "current",
+      "confidence": "high",
+      "description": "Borrowed memory block inside explorer for the hit-test struct. Nested inside Desktop.cs.",
+      "sourceRefs": [
+        {
+          "file": "Desktop.cs",
+          "line": 197,
+          "anchor": "OpenProcess"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 202,
+          "anchor": "VirtualAllocEx"
+        }
+      ]
+    },
+    {
+      "id": "comp.settings",
+      "label": "Settings",
+      "type": "module",
+      "state": "current",
+      "confidence": "high",
+      "description": "Four REG_DWORD values under HKCU\\Software\\DesktopIconToggle.",
+      "sourceRefs": [
+        {
+          "file": "Settings.cs",
+          "line": 12,
+          "anchor": "AppKey"
+        }
+      ]
+    },
+    {
+      "id": "comp.autostart",
+      "label": "Autostart",
+      "type": "module",
+      "state": "current",
+      "confidence": "high",
+      "description": "HKCU Run value, self-heal of a stale exe path.",
+      "sourceRefs": [
+        {
+          "file": "Autostart.cs",
+          "line": 11,
+          "anchor": "RunKey"
+        }
+      ]
+    },
+    {
+      "id": "comp.native",
+      "label": "Native",
+      "type": "module",
+      "state": "current",
+      "confidence": "high",
+      "description": "The only place DllImport appears: 61 declarations plus Win32 structs, constants, and delegates.",
+      "sourceRefs": [
+        {
+          "file": "Native.cs",
+          "line": 290,
+          "anchor": "SetWindowsHookExW"
+        },
+        {
+          "file": "README.md",
+          "line": 116,
+          "anchor": "DllImport"
+        }
+      ]
+    },
+    {
+      "id": "ext.user32",
+      "label": "user32.dll",
+      "type": "external-system",
+      "state": "current",
+      "confidence": "high",
+      "description": "41 of the 61 P/Invoke declarations: windows, messages, hooks, menus, timers.",
+      "sourceRefs": [
+        {
+          "file": "Native.cs",
+          "line": 42,
+          "anchor": "RegisterWindowMessageW"
+        }
+      ]
+    },
+    {
+      "id": "ext.shell32",
+      "label": "shell32.dll",
+      "type": "external-system",
+      "state": "current",
+      "confidence": "high",
+      "description": "Tray icon registration and icon extraction.",
+      "sourceRefs": [
+        {
+          "file": "Native.cs",
+          "line": 370,
+          "anchor": "Shell_NotifyIconW"
+        }
+      ]
+    },
+    {
+      "id": "ext.kernel32",
+      "label": "kernel32.dll",
+      "type": "external-system",
+      "state": "current",
+      "confidence": "high",
+      "description": "Mutex, module handle, tick count, and the cross-process memory primitives.",
+      "sourceRefs": [
+        {
+          "file": "Native.cs",
+          "line": 379,
+          "anchor": "CreateMutexW"
+        }
+      ]
+    },
+    {
+      "id": "ext.advapi32",
+      "label": "advapi32.dll",
+      "type": "external-system",
+      "state": "current",
+      "confidence": "high",
+      "description": "All registry access.",
+      "sourceRefs": [
+        {
+          "file": "Native.cs",
+          "line": 437,
+          "anchor": "RegGetValueW"
+        }
+      ]
+    },
+    {
+      "id": "ext.explorer.desktop",
+      "label": "Explorer desktop window tree",
+      "type": "external-system",
+      "state": "current",
+      "confidence": "high",
+      "description": "Progman and every WorkerW, each holding SHELLDLL_DefView and the SysListView32 icon layer that is actually hidden.",
+      "sourceRefs": [
+        {
+          "file": "Desktop.cs",
+          "line": 39,
+          "anchor": "FindWindowW"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 18,
+          "anchor": "SysListView32"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 61,
+          "anchor": "ListViewClass"
+        }
+      ]
+    },
+    {
+      "id": "ext.explorer.tray",
+      "label": "Explorer notification area",
+      "type": "external-system",
+      "state": "current",
+      "confidence": "high",
+      "description": "Hosts the tray icon and re-broadcasts TaskbarCreated when the shell restarts.",
+      "sourceRefs": [
+        {
+          "file": "TrayIcon.cs",
+          "line": 29,
+          "anchor": "WM_TRAY"
+        },
+        {
+          "file": "Program.cs",
+          "line": 199,
+          "anchor": "TaskbarCreatedMessage"
+        }
+      ]
+    },
+    {
+      "id": "store.hkcu.settings",
+      "label": "HKCU\\Software\\DesktopIconToggle",
+      "type": "database",
+      "state": "current",
+      "confidence": "high",
+      "description": "App settings plus last icon visibility state.",
+      "sourceRefs": [
+        {
+          "file": "Settings.cs",
+          "line": 12,
+          "anchor": "AppKey"
+        }
+      ]
+    },
+    {
+      "id": "store.hkcu.run",
+      "label": "HKCU\\...\\CurrentVersion\\Run",
+      "type": "database",
+      "state": "current",
+      "confidence": "high",
+      "description": "Single REG_SZ registering the exe with --boot.",
+      "sourceRefs": [
+        {
+          "file": "Autostart.cs",
+          "line": 26,
+          "anchor": "--boot"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "e.user-gesture",
+      "from": "actor.user",
+      "to": "comp.gesturehook",
+      "type": "triggers",
+      "sync": "sync",
+      "protocol": "raw mouse input",
+      "confidence": "high",
+      "description": "Double click on empty desktop reaches the low-level hook.",
+      "sourceRefs": [
+        {
+          "file": "DesktopGestureHook.cs",
+          "line": 87,
+          "anchor": "fromRealMouse"
+        }
+      ]
+    },
+    {
+      "id": "e.injected-gesture",
+      "from": "actor.injected",
+      "to": "comp.gesturehook",
+      "type": "triggers",
+      "sync": "sync",
+      "protocol": "raw mouse input",
+      "confidence": "high",
+      "description": "Synthetic events carry the injected bits and can be gated off by a setting.",
+      "sourceRefs": [
+        {
+          "file": "DesktopGestureHook.cs",
+          "line": 22,
+          "anchor": "LLMHF_ANY_INJECTED"
+        }
+      ]
+    },
+    {
+      "id": "e.user-tray",
+      "from": "actor.user",
+      "to": "comp.trayicon",
+      "type": "operates",
+      "sync": "sync",
+      "protocol": "shell notify callback",
+      "confidence": "high",
+      "description": "Left double click toggles once, right button up opens the menu.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 275,
+          "anchor": "Desktop.ToggleIcons"
+        },
+        {
+          "file": "Program.cs",
+          "line": 281,
+          "anchor": "ShowMenu"
+        }
+      ]
+    },
+    {
+      "id": "e.script-cli",
+      "from": "actor.script",
+      "to": "proc.cli",
+      "type": "invokes",
+      "sync": "sync",
+      "protocol": "process spawn + argv",
+      "confidence": "high",
+      "description": "One argv token selects the whole behaviour.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 33,
+          "anchor": "ToLowerInvariant"
+        },
+        {
+          "file": "Program.cs",
+          "line": 35,
+          "anchor": "switch (command)"
+        }
+      ]
+    },
+    {
+      "id": "e.dit-exe",
+      "from": "sys.dit",
+      "to": "container.exe",
+      "type": "deployed-as",
+      "sync": "n/a",
+      "protocol": "single file",
+      "confidence": "high",
+      "description": "One framework-dependent single-file exe, no installer toolchain.",
+      "sourceRefs": [
+        {
+          "file": "DesktopIconToggle.csproj",
+          "line": 6,
+          "anchor": "WinExe"
+        },
+        {
+          "file": "README.md",
+          "line": 5,
+          "anchor": "DesktopIconToggle.exe"
+        }
+      ]
+    },
+    {
+      "id": "e-server-holds-components",
+      "from": "proc.server",
+      "to": "container.exe",
+      "type": "runs-as",
+      "sync": "n/a",
+      "protocol": "in-process",
+      "confidence": "high",
+      "description": "Server role is the long-lived process: mutex, message loop, hook, tray.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 62,
+          "anchor": "CreateMutexW"
+        },
+        {
+          "file": "Program.cs",
+          "line": 99,
+          "anchor": "GetMessageW"
+        }
+      ]
+    },
+    {
+      "id": "e-cli-holds-components",
+      "from": "proc.cli",
+      "to": "container.exe",
+      "type": "runs-as",
+      "sync": "n/a",
+      "protocol": "in-process",
+      "confidence": "high",
+      "description": "Client role exits after one command.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 32,
+          "anchor": "AttachConsole"
+        }
+      ]
+    },
+    {
+      "id": "e.program-ipcwindow",
+      "from": "comp.program",
+      "to": "comp.ipcwindow",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Creates the window, posts to it, queries it, disposes it.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 79,
+          "anchor": "new IpcWindow"
+        },
+        {
+          "file": "Program.cs",
+          "line": 71,
+          "anchor": "IpcWindow.FindOther"
+        }
+      ]
+    },
+    {
+      "id": "e.program-hook",
+      "from": "comp.program",
+      "to": "comp.gesturehook",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Installs the hook and reads its diagnostic counters.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 87,
+          "anchor": "new DesktopGestureHook"
+        }
+      ]
+    },
+    {
+      "id": "e.program-tray",
+      "from": "comp.program",
+      "to": "comp.trayicon",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Creates the tray icon and drives the bounded re-arm retries.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 88,
+          "anchor": "new TrayIcon"
+        },
+        {
+          "file": "Program.cs",
+          "line": 175,
+          "anchor": "_tray.Add"
+        }
+      ]
+    },
+    {
+      "id": "e.program-desktop",
+      "from": "comp.program",
+      "to": "comp.desktop",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Every visibility read, write, point classification, and hit test.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 275,
+          "anchor": "Desktop.ToggleIcons"
+        },
+        {
+          "file": "Program.cs",
+          "line": 319,
+          "anchor": "Desktop.IsDesktopPoint"
+        },
+        {
+          "file": "Program.cs",
+          "line": 344,
+          "anchor": "Desktop.IsDoubleClickOnIcon"
+        },
+        {
+          "file": "Program.cs",
+          "line": 142,
+          "anchor": "Desktop.FindIconLayers"
+        }
+      ]
+    },
+    {
+      "id": "e.program-settings",
+      "from": "comp.program",
+      "to": "comp.settings",
+      "type": "reads",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Single read funnel (SettingIsOn) plus menu writes.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 383,
+          "anchor": "Settings.Read"
+        },
+        {
+          "file": "Program.cs",
+          "line": 125,
+          "anchor": "SettingIsOn"
+        }
+      ]
+    },
+    {
+      "id": "e.program-autostart",
+      "from": "comp.program",
+      "to": "comp.autostart",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Self-heal at startup, set/read from menu and CLI.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 96,
+          "anchor": "Autostart.SelfHeal"
+        },
+        {
+          "file": "Program.cs",
+          "line": 625,
+          "anchor": "Autostart.Set"
+        }
+      ]
+    },
+    {
+      "id": "e.program-native",
+      "from": "comp.program",
+      "to": "comp.native",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Message loop, timers, console attach, message constants.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 99,
+          "anchor": "Native.GetMessageW"
+        },
+        {
+          "file": "Program.cs",
+          "line": 149,
+          "anchor": "Native.SetTimer"
+        }
+      ]
+    },
+    {
+      "id": "e.hook-ipcwindow",
+      "from": "comp.gesturehook",
+      "to": "comp.ipcwindow",
+      "type": "publishes",
+      "sync": "async",
+      "protocol": "PostMessage (in-process)",
+      "confidence": "high",
+      "description": "Hand-off off the hook thread; the callback itself does no heap work.",
+      "sourceRefs": [
+        {
+          "file": "DesktopGestureHook.cs",
+          "line": 90,
+          "anchor": "_window.Post"
+        }
+      ]
+    },
+    {
+      "id": "e.hook-native",
+      "from": "comp.gesturehook",
+      "to": "comp.native",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Hook install/uninstall, double-click time and rect metrics.",
+      "sourceRefs": [
+        {
+          "file": "DesktopGestureHook.cs",
+          "line": 52,
+          "anchor": "Native.SetWindowsHookExW"
+        },
+        {
+          "file": "DesktopGestureHook.cs",
+          "line": 44,
+          "anchor": "GetDoubleClickTime"
+        }
+      ]
+    },
+    {
+      "id": "e.ipcwindow-native",
+      "from": "comp.ipcwindow",
+      "to": "comp.native",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Class registration, window creation, discovery, send/post.",
+      "sourceRefs": [
+        {
+          "file": "IpcWindow.cs",
+          "line": 34,
+          "anchor": "RegisterClassExW"
+        },
+        {
+          "file": "IpcWindow.cs",
+          "line": 41,
+          "anchor": "CreateWindowExW"
+        },
+        {
+          "file": "IpcWindow.cs",
+          "line": 109,
+          "anchor": "SendMessageTimeoutW"
+        }
+      ]
+    },
+    {
+      "id": "e.tray-native",
+      "from": "comp.trayicon",
+      "to": "comp.native",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Notify icon adds/updates/deletes and icon extraction.",
+      "sourceRefs": [
+        {
+          "file": "TrayIcon.cs",
+          "line": 39,
+          "anchor": "NIM_ADD"
+        },
+        {
+          "file": "TrayIcon.cs",
+          "line": 60,
+          "anchor": "ExtractIconExW"
+        }
+      ]
+    },
+    {
+      "id": "e.desktop-native",
+      "from": "comp.desktop",
+      "to": "comp.native",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Enumeration, visibility, hit test, remote memory.",
+      "sourceRefs": [
+        {
+          "file": "Desktop.cs",
+          "line": 39,
+          "anchor": "Native.FindWindowW"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 165,
+          "anchor": "Native.SendMessageTimeoutW"
+        }
+      ]
+    },
+    {
+      "id": "e.settings-native",
+      "from": "comp.settings",
+      "to": "comp.native",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Registry get/create/set/close.",
+      "sourceRefs": [
+        {
+          "file": "Settings.cs",
+          "line": 43,
+          "anchor": "Native.RegGetValueW"
+        },
+        {
+          "file": "Settings.cs",
+          "line": 60,
+          "anchor": "Native.RegSetValueExW"
+        }
+      ]
+    },
+    {
+      "id": "e.autostart-native",
+      "from": "comp.autostart",
+      "to": "comp.native",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Registry open/set/delete/close on the Run key.",
+      "sourceRefs": [
+        {
+          "file": "Autostart.cs",
+          "line": 34,
+          "anchor": "Native.RegGetValueW"
+        },
+        {
+          "file": "Autostart.cs",
+          "line": 57,
+          "anchor": "Native.RegDeleteValueW"
+        }
+      ]
+    },
+    {
+      "id": "e.desktop-settings",
+      "from": "comp.desktop",
+      "to": "comp.settings",
+      "type": "writes",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Records last visibility state on every real change, so it survives reboot.",
+      "sourceRefs": [
+        {
+          "file": "Desktop.cs",
+          "line": 86,
+          "anchor": "Settings.Write"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 106,
+          "anchor": "Settings.Write"
+        }
+      ]
+    },
+    {
+      "id": "e.desktop-remoteblock",
+      "from": "comp.desktop",
+      "to": "comp.remoteblock",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Allocates the LVHITTESTINFO scratch inside explorer, writes, reads back, frees.",
+      "sourceRefs": [
+        {
+          "file": "Desktop.cs",
+          "line": 202,
+          "anchor": "VirtualAllocEx"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 213,
+          "anchor": "WriteProcessMemory"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 216,
+          "anchor": "ReadProcessMemory"
+        }
+      ]
+    },
+    {
+      "id": "e.native-user32",
+      "from": "comp.native",
+      "to": "ext.user32",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "P/Invoke",
+      "confidence": "high",
+      "description": "41 declarations.",
+      "sourceRefs": [
+        {
+          "file": "Native.cs",
+          "line": 290,
+          "anchor": "SetWindowsHookExW"
+        }
+      ]
+    },
+    {
+      "id": "e.native-shell32",
+      "from": "comp.native",
+      "to": "ext.shell32",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "P/Invoke",
+      "confidence": "high",
+      "description": "2 declarations.",
+      "sourceRefs": [
+        {
+          "file": "Native.cs",
+          "line": 370,
+          "anchor": "Shell_NotifyIconW"
+        }
+      ]
+    },
+    {
+      "id": "e.native-kernel32",
+      "from": "comp.native",
+      "to": "ext.kernel32",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "P/Invoke",
+      "confidence": "high",
+      "description": "12 declarations.",
+      "sourceRefs": [
+        {
+          "file": "Native.cs",
+          "line": 379,
+          "anchor": "CreateMutexW"
+        }
+      ]
+    },
+    {
+      "id": "e.native-advapi32",
+      "from": "comp.native",
+      "to": "ext.advapi32",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "P/Invoke",
+      "confidence": "high",
+      "description": "6 declarations.",
+      "sourceRefs": [
+        {
+          "file": "Native.cs",
+          "line": 437,
+          "anchor": "RegGetValueW"
+        }
+      ]
+    },
+    {
+      "id": "e.desktop-showhide",
+      "from": "comp.desktop",
+      "to": "ext.explorer.desktop",
+      "type": "writes",
+      "sync": "async",
+      "protocol": "ShowWindowAsync on foreign HWND",
+      "confidence": "high",
+      "description": "The actual toggle primitive, deliberately async so a hung explorer cannot stall the hook thread.",
+      "sourceRefs": [
+        {
+          "file": "Desktop.cs",
+          "line": 91,
+          "anchor": "ShowWindowAsync"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 96,
+          "anchor": "RedrawWindow"
+        }
+      ]
+    },
+    {
+      "id": "e.desktop-hittest",
+      "from": "comp.remoteblock",
+      "to": "ext.explorer.desktop",
+      "type": "calls",
+      "sync": "sync",
+      "protocol": "SendMessageTimeoutW LVM_SUBITEMHITTEST, 150 ms",
+      "confidence": "high",
+      "description": "Asks explorer's list view whether the point is on an item.",
+      "sourceRefs": [
+        {
+          "file": "Desktop.cs",
+          "line": 165,
+          "anchor": "SendMessageTimeoutW"
+        }
+      ]
+    },
+    {
+      "id": "e.desktop-readstate",
+      "from": "comp.desktop",
+      "to": "ext.explorer.desktop",
+      "type": "reads",
+      "sync": "sync",
+      "protocol": "IsWindowVisible",
+      "confidence": "high",
+      "description": "State is never cached; re-queried every call.",
+      "sourceRefs": [
+        {
+          "file": "Desktop.cs",
+          "line": 70,
+          "anchor": "IsWindowVisible"
+        }
+      ]
+    },
+    {
+      "id": "e.tray-explorer",
+      "from": "comp.trayicon",
+      "to": "ext.explorer.tray",
+      "type": "registers-with",
+      "sync": "sync",
+      "protocol": "Shell_NotifyIconW",
+      "confidence": "high",
+      "description": "NIM_ADD, NIM_SETVERSION v4, NIM_DELETE.",
+      "sourceRefs": [
+        {
+          "file": "TrayIcon.cs",
+          "line": 39,
+          "anchor": "NIM_ADD"
+        },
+        {
+          "file": "TrayIcon.cs",
+          "line": 46,
+          "anchor": "NIM_SETVERSION"
+        }
+      ]
+    },
+    {
+      "id": "e.taskbarcreated",
+      "from": "ext.explorer.tray",
+      "to": "comp.program",
+      "type": "publishes",
+      "sync": "async",
+      "protocol": "RegisterWindowMessageW broadcast",
+      "confidence": "high",
+      "description": "Shell restart invalidates the registration; the handler re-arms with a bounded retry.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 199,
+          "anchor": "TaskbarCreatedMessage"
+        },
+        {
+          "file": "Native.cs",
+          "line": 42,
+          "anchor": "RegisterWindowMessageW"
+        }
+      ]
+    },
+    {
+      "id": "e.settings-store",
+      "from": "comp.settings",
+      "to": "store.hkcu.settings",
+      "type": "reads-writes",
+      "sync": "sync",
+      "protocol": "registry",
+      "confidence": "high",
+      "description": "REG_DWORD only; deleting the key restores defaults.",
+      "sourceRefs": [
+        {
+          "file": "Settings.cs",
+          "line": 12,
+          "anchor": "AppKey"
+        }
+      ]
+    },
+    {
+      "id": "e-desktop-writes-state",
+      "from": "comp.settings",
+      "to": "store.hkcu.settings",
+      "type": "reads-writes",
+      "sync": "sync",
+      "protocol": "registry",
+      "confidence": "high",
+      "description": "Last icon visibility is persisted here by Desktop, not by Program.",
+      "sourceRefs": [
+        {
+          "file": "Settings.cs",
+          "line": 33,
+          "anchor": "IconsVisibleOnExit"
+        }
+      ]
+    },
+    {
+      "id": "e.autostart-store",
+      "from": "comp.autostart",
+      "to": "store.hkcu.run",
+      "type": "reads-writes",
+      "sync": "sync",
+      "protocol": "registry",
+      "confidence": "high",
+      "description": "One REG_SZ; self-heal only rewrites a path whose file is gone.",
+      "sourceRefs": [
+        {
+          "file": "Autostart.cs",
+          "line": 52,
+          "anchor": "RegOpenKeyExW"
+        },
+        {
+          "file": "Autostart.cs",
+          "line": 99,
+          "anchor": "Set(true)"
+        }
+      ]
+    },
+    {
+      "id": "e.cli-server-discover",
+      "from": "proc.cli",
+      "to": "proc.server",
+      "type": "calls",
+      "sync": "mixed",
+      "protocol": "FindWindowExW by class+title, SendMessageTimeoutW 1000 ms / PostMessageW",
+      "confidence": "high",
+      "description": "Discovery verifies the owning exe path, so a decoy window with the same title is not trusted. Queries are synchronous with a timeout; --exit is fire-and-forget.",
+      "sourceRefs": [
+        {
+          "file": "IpcWindow.cs",
+          "line": 77,
+          "anchor": "FindWindowExW"
+        },
+        {
+          "file": "IpcWindow.cs",
+          "line": 97,
+          "anchor": "QueryFullProcessImageNameW"
+        },
+        {
+          "file": "IpcWindow.cs",
+          "line": 109,
+          "anchor": "SendMessageTimeoutW"
+        },
+        {
+          "file": "Program.cs",
+          "line": 635,
+          "anchor": "WM_APP_QUIT"
+        }
+      ]
+    },
+    {
+      "id": "e.cli-direct-desktop",
+      "from": "proc.cli",
+      "to": "comp.desktop",
+      "type": "calls",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "--toggle/--show/--hide do not need the background instance; README states this on purpose so the CLI is always an escape hatch.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 529,
+          "anchor": "Desktop.ToggleIcons"
+        },
+        {
+          "file": "Program.cs",
+          "line": 537,
+          "anchor": "Desktop.SetIconsVisible"
+        },
+        {
+          "file": "README.md",
+          "line": 35,
+          "anchor": "ShowWindowAsync"
+        }
+      ]
+    },
+    {
+      "id": "e.bootrestore-timer",
+      "from": "comp.program",
+      "to": "comp.program",
+      "type": "self-loop",
+      "sync": "async",
+      "protocol": "WM_TIMER id 0xB007, 2000 ms, max 10 retries, always killed",
+      "confidence": "high",
+      "description": "Boot restore retries until explorer builds the icon layer, then kills the timer.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 115,
+          "anchor": "BootRetryTimer"
+        },
+        {
+          "file": "Program.cs",
+          "line": 149,
+          "anchor": "SetTimer"
+        },
+        {
+          "file": "Program.cs",
+          "line": 146,
+          "anchor": "KillTimer"
+        }
+      ]
+    },
+    {
+      "id": "e.wmapp-protocol",
+      "from": "comp.native",
+      "to": "comp.program",
+      "type": "supplies",
+      "sync": "n/a",
+      "protocol": "constant declarations",
+      "confidence": "high",
+      "description": "The WM_APP protocol the two roles speak: ping, gesture hand-off, icon-test return, two stat channels, quit. Values are fixed, not runtime-allocated, except TaskbarCreated which is dynamic by design.",
+      "sourceRefs": [
+        {
+          "file": "Native.cs",
+          "line": 21,
+          "anchor": "WM_TRAY"
+        },
+        {
+          "file": "Native.cs",
+          "line": 24,
+          "anchor": "WM_APP_GESTURE"
+        },
+        {
+          "file": "Native.cs",
+          "line": 27,
+          "anchor": "WM_APP_ICON_TEST"
+        },
+        {
+          "file": "Native.cs",
+          "line": 30,
+          "anchor": "WM_APP_PING"
+        },
+        {
+          "file": "Native.cs",
+          "line": 33,
+          "anchor": "WM_APP_MENU_STATS"
+        },
+        {
+          "file": "Native.cs",
+          "line": 35,
+          "anchor": "WM_APP_GESTURE_STATS"
+        },
+        {
+          "file": "Native.cs",
+          "line": 36,
+          "anchor": "WM_APP_QUIT"
+        }
+      ]
+    },
+    {
+      "id": "e.gesture-throttle",
+      "from": "comp.program",
+      "to": "comp.program",
+      "type": "self-loop",
+      "sync": "sync",
+      "protocol": "in-process guard",
+      "confidence": "high",
+      "description": "100 ms floor on the decision path. Not politeness: a queued backlog pushes the hook past LowLevelHooksTimeout (300 ms), which makes the whole system's mouse stutter and silently removes the hook while hook_set still reports 1.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 312,
+          "anchor": "GestureThrottleMs"
+        },
+        {
+          "file": "Program.cs",
+          "line": 350,
+          "anchor": "GestureThrottleMs = 100"
+        }
+      ]
+    },
+    {
+      "id": "e.gesture-inflight",
+      "from": "comp.program",
+      "to": "comp.program",
+      "type": "self-loop",
+      "sync": "sync",
+      "protocol": "Interlocked",
+      "confidence": "high",
+      "description": "Exactly one hit test may be outstanding. The only concurrency primitive in the app, and drops are counted rather than silently swallowed.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 332,
+          "anchor": "Interlocked.CompareExchange"
+        }
+      ]
+    },
+    {
+      "id": "e.gesture-worker",
+      "from": "comp.program",
+      "to": "comp.desktop",
+      "type": "calls",
+      "sync": "async",
+      "protocol": "ThreadPool work item, result posted back as WM_APP_ICON_TEST",
+      "confidence": "high",
+      "description": "Deliberate offload: the message thread does cheap checks only (point classification, style bit); anything that sends to explorer moves off it.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 341,
+          "anchor": "ThreadPool.QueueUserWorkItem"
+        },
+        {
+          "file": "Program.cs",
+          "line": 346,
+          "anchor": "WM_APP_ICON_TEST"
+        },
+        {
+          "file": "Program.cs",
+          "line": 325,
+          "anchor": "Desktop.ClicksThrough"
+        }
+      ]
+    },
+    {
+      "id": "e.desktop-point",
+      "from": "comp.desktop",
+      "to": "ext.explorer.desktop",
+      "type": "reads",
+      "sync": "sync",
+      "protocol": "WindowFromPoint / GetAncestor / GetParent / style bit",
+      "confidence": "high",
+      "description": "Decides whether a screen point is the desktop itself, and returns the icon list under it. Read from the message thread, so no cross-process send here.",
+      "sourceRefs": [
+        {
+          "file": "Desktop.cs",
+          "line": 119,
+          "anchor": "WindowFromPoint"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 128,
+          "anchor": "GetParent"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 138,
+          "anchor": "GetWindowLongPtr"
+        }
+      ]
+    },
+    {
+      "id": "e.desktop-hittest-detail",
+      "from": "comp.desktop",
+      "to": "ext.explorer.desktop",
+      "type": "calls",
+      "sync": "sync",
+      "protocol": "LVM_SUBITEMHITTEST via SendMessageTimeoutW, 150 ms, abort-if-hung",
+      "confidence": "high",
+      "description": "Asks explorer's list view for the item at a client point. Client coordinates are converted first; the pid check exists because a DefView can belong to a different process than expected.",
+      "sourceRefs": [
+        {
+          "file": "Desktop.cs",
+          "line": 149,
+          "anchor": "IsWindowVisible"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 152,
+          "anchor": "ScreenToClient"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 154,
+          "anchor": "GetWindowThreadProcessId"
+        },
+        {
+          "file": "Desktop.cs",
+          "line": 165,
+          "anchor": "LVM_SUBITEMHITTEST"
+        }
+      ]
+    },
+    {
+      "id": "e.hook-chains",
+      "from": "comp.gesturehook",
+      "to": "ext.user32",
+      "type": "calls",
+      "sync": "sync",
+      "protocol": "CallNextHookEx",
+      "confidence": "high",
+      "description": "Every event is chained on. The gesture never consumes the click, so double-clicking an icon still launches the program normally.",
+      "sourceRefs": [
+        {
+          "file": "DesktopGestureHook.cs",
+          "line": 99,
+          "anchor": "CallNextHookEx"
+        },
+        {
+          "file": "DesktopGestureHook.cs",
+          "line": 46,
+          "anchor": "GetSystemMetrics"
+        }
+      ]
+    },
+    {
+      "id": "e.hook-uninstall",
+      "from": "comp.program",
+      "to": "comp.gesturehook",
+      "type": "depends-on",
+      "sync": "sync",
+      "protocol": "in-process call",
+      "confidence": "high",
+      "description": "Loop exit disposes hook, window, tray in that order; a leaked global hook would outlive the intent.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 107,
+          "anchor": "_hook?.Dispose"
+        },
+        {
+          "file": "DesktopGestureHook.cs",
+          "line": 105,
+          "anchor": "UnhookWindowsHookEx"
+        }
+      ]
+    },
+    {
+      "id": "e.endsession-persist",
+      "from": "comp.program",
+      "to": "comp.desktop",
+      "type": "writes",
+      "sync": "sync",
+      "protocol": "in-process call at WM_QUERYENDSESSION",
+      "confidence": "high",
+      "description": "Re-reads the REAL visibility at session end and stores it, so a change made through explorer's own right-click menu is not lost at reboot.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 234,
+          "anchor": "RememberCurrentState"
+        }
+      ]
+    },
+    {
+      "id": "e.menu-blocks",
+      "from": "comp.program",
+      "to": "ext.user32",
+      "type": "calls",
+      "sync": "sync",
+      "protocol": "TrackPopupMenuEx (blocking)",
+      "confidence": "high",
+      "description": "Menu tracking blocks the message thread by design; this is also why WM_CLOSE is ignored - the system sends it to the menu owner while tracking.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 474,
+          "anchor": "TrackPopupMenuEx"
+        }
+      ]
+    },
+    {
+      "id": "e.status-diag",
+      "from": "proc.cli",
+      "to": "proc.server",
+      "type": "reads",
+      "sync": "sync",
+      "protocol": "three read-only WM_APP stat channels",
+      "confidence": "high",
+      "description": "Graded self-report instead of one health boolean: hook installed vs callback actually fired vs a double click was paired vs ShowWindow actually ran vs dropped. Two outages this session were 'looks fine, does nothing' and only the graded counters localised them.",
+      "sourceRefs": [
+        {
+          "file": "Program.cs",
+          "line": 545,
+          "anchor": "QueryReport"
+        },
+        {
+          "file": "Program.cs",
+          "line": 559,
+          "anchor": "QueryMenuStats"
+        },
+        {
+          "file": "Program.cs",
+          "line": 568,
+          "anchor": "QueryGestureStats"
+        },
+        {
+          "file": "Program.cs",
+          "line": 398,
+          "anchor": "ShowWindowCalls"
+        },
+        {
+          "file": "Program.cs",
+          "line": 407,
+          "anchor": "Installed"
+        },
+        {
+          "file": "Program.cs",
+          "line": 444,
+          "anchor": "IconsVisible"
+        }
+      ]
+    },
+    {
+      "id": "e.ipc-identity",
+      "from": "comp.ipcwindow",
+      "to": "ext.kernel32",
+      "type": "calls",
+      "sync": "sync",
+      "protocol": "OpenProcess + QueryFullProcessImageNameW",
+      "confidence": "high",
+      "description": "Instance discovery matches class AND title, then confirms the owning exe path. Title alone would let any foreign window receive --exit.",
+      "sourceRefs": [
+        {
+          "file": "IpcWindow.cs",
+          "line": 15,
+          "anchor": "WindowName"
+        },
+        {
+          "file": "IpcWindow.cs",
+          "line": 52,
+          "anchor": "PostMessageW"
+        },
+        {
+          "file": "IpcWindow.cs",
+          "line": 91,
+          "anchor": "OpenProcess"
+        }
+      ]
+    },
+    {
+      "id": "e.settings-create",
+      "from": "comp.settings",
+      "to": "ext.advapi32",
+      "type": "writes",
+      "sync": "sync",
+      "protocol": "RegCreateKeyExW / RegSetValueExW",
+      "confidence": "high",
+      "description": "Create-on-write, no installer step; deleting the key is the documented way back to defaults.",
+      "sourceRefs": [
+        {
+          "file": "Settings.cs",
+          "line": 55,
+          "anchor": "RegCreateKeyExW"
+        }
+      ]
+    },
+    {
+      "id": "e.tray-teardown",
+      "from": "comp.trayicon",
+      "to": "ext.shell32",
+      "type": "writes",
+      "sync": "sync",
+      "protocol": "NIM_DELETE + DestroyIcon",
+      "confidence": "high",
+      "description": "Registration is removed on dispose; icon handles extracted for use are destroyed. Both matter - a leaked registration leaves a dead ghost icon in the shell.",
+      "sourceRefs": [
+        {
+          "file": "TrayIcon.cs",
+          "line": 76,
+          "anchor": "NIM_DELETE"
+        },
+        {
+          "file": "TrayIcon.cs",
+          "line": 79,
+          "anchor": "DestroyIcon"
+        }
+      ]
+    }
+  ],
+  "prose": [
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Autostart.cs",
+      "line": 70,
+      "anchor": "/// <summary>"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Autostart.cs",
+      "line": 74,
+      "anchor": "里取出可执行文件路径"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Desktop.cs",
+      "line": 15,
+      "anchor": "ProgmanClass"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Desktop.cs",
+      "line": 88,
+      "anchor": "foreach"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "DesktopIconToggle.csproj",
+      "line": 28,
+      "anchor": "ServerGarbageCollection"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Native.cs",
+      "line": 289,
+      "anchor": "DllImport"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Native.cs",
+      "line": 368,
+      "anchor": "shell32.dll"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Native.cs",
+      "line": 378,
+      "anchor": "kernel32.dll"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Native.cs",
+      "line": 41,
+      "anchor": "DllImport"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Native.cs",
+      "line": 436,
+      "anchor": "advapi32.dll"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Program.cs",
+      "line": 168,
+      "anchor": "便宜的保险"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Program.cs",
+      "line": 177,
+      "anchor": "800"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Program.cs",
+      "line": 343,
+      "anchor": "onIcon = true"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 13,
+      "anchor": "后台实例自己执行"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 39,
+      "anchor": "两份 exe 是两个身份"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 49,
+      "anchor": "一次堆内存都不分配"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 53,
+      "anchor": "状态不落缓存"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 57,
+      "anchor": "溢出区"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 61,
+      "anchor": "隐藏的是图标层"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 65,
+      "anchor": "LVM_SUBITEMHITTEST"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 7,
+      "anchor": "6.3"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 73,
+      "anchor": "TrackPopupMenuEx"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 77,
+      "anchor": "状态自证是分级的"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 8,
+      "anchor": "239"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 81,
+      "anchor": "窗口类名"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 84,
+      "anchor": "两处未实测"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "README.md",
+      "line": 88,
+      "anchor": "100ms"
+    },
+    {
+      "claim": "cited by markdown artifact(s): dependencies-summary.md, scenario-route.md, system-model.architecture-understanding.md, system-model.summary.md",
+      "file": "Settings.cs",
+      "line": 23,
+      "anchor": "RespondToInjectedDoubleClickDefault"
+    }
+  ]
+}

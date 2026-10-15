@@ -1,0 +1,4 @@
+C0 base            tracks=17 last_ms=1812
+C1 menu is open    tracks=17 last_ms=1812   (tracks 未增加 = 仍卡在模态循环里)
+C2 after outside   tracks=19 last_ms=1797   (等待约 2308 ms)
+VERDICT: PASS - 菜单一直开着，直到点击外部才返回（跟踪 1797 ms ~ 等待 2308 ms）

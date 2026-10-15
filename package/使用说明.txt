@@ -1,0 +1,41 @@
+﻿桌面图标开关 DesktopIconToggle 1.0.0
+==================================
+
+装：
+    powershell -ExecutionPolicy Bypass -File install.ps1
+      · 把程序装进 %LOCALAPPDATA%\DesktopIconToggle\（只有你自己能写的目录）
+      · 用那一份登记开机自启（HKCU 的 Run 键，不需要管理员）
+      · 起一份常驻实例，并独立回读反证它真的在跑
+      · 只要程序、不要自启：  powershell -File install.ps1 -NoAutostart
+
+卸：
+    powershell -ExecutionPolicy Bypass -File uninstall.ps1
+      · 会把桌面图标放回"显示"、正常退出实例（不硬杀，硬杀会在任务栏留点不到的幽灵图标）、
+        清掉自启项、删掉安装目录
+      · 想连设置项一起清掉：  powershell -File uninstall.ps1 -RemoveSettings
+
+怎么用：
+    双击桌面空白处        = 显示 / 隐藏全部桌面图标，再双击 = 恢复
+    双击桌面图标          = 照常启动那个程序（手势会让位，不抢你的点击）
+    托盘图标 左键双击     = 手动切换一次
+    托盘图标 右键         = 菜单：隐藏/显示、开机自启、双击手势开关、接受注入的双击、开机后保持上次状态、恢复默认、退出
+    命令行                = DesktopIconToggle.exe --status / --toggle / --hide / --show
+                            --autostart / --no-autostart / --exit
+
+要求：Windows 10/11 x64 + 已装 .NET 8 桌面运行时。不需要管理员权限，不装服务，不开端口，不联网。
+实测：单文件 219,889 字节；常驻私有内存 6.3–7.1 MB；空闲 30 秒 CPU 增量 0 ms；冷启动 279–455 ms；
+      双击到图标消失 239–306 ms；70 分钟驻留私有内存漂移 -0.73 MB、句柄 -5、CPU 合计 126 ms。
+
+两个要知道的边界：
+    1) 托盘图标可能被 Windows 收进「显示隐藏的图标」，点任务栏上的 ^ 展开就能看到；
+       找不到时命令行永远可用（--toggle 不依赖托盘，也不依赖后台实例）。
+    2) 如果你在图标隐藏的状态下退出程序，用系统侧兜底恢复：右键桌面 → 查看 → 显示桌面图标。
+
+为什么装到 %LOCALAPPDATA% 而不是随手放某个目录：
+    如果 exe 放在同用户可写的路径（比如某些盘根默认给 Authenticated Users 完全控制并可继承），
+    而开机自启又指着它，那么任何以你身份运行的程序都能就地把它换成自己的程序，
+    让那个替换品在下次开机时以你的身份运行。装到只有你能写的目录，这条链就断了。
+
+包内容：DesktopIconToggle.exe（主程序）、install.ps1、uninstall.ps1、README.md、使用说明.txt、SHA256SUMS.txt
+校验：SHA256SUMS.txt 里的哈希应与 dist\DesktopIconToggle.exe 逐字节一致，可自查。
+完整测试记录（33 条受控用例 + 29 个缺陷的回归证据，含被测 exe 的 SHA256）见工程目录 TEST-REPORT.md。

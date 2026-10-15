@@ -1,0 +1,1046 @@
+﻿// Independent Win32 probe used by the QA scripts.
+// Not part of the product build: lives OUTSIDE the project directory on purpose,
+// because the SDK-style csproj globs **/*.cs under the project root.
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace Qa
+{
+    public static class Win
+    {
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct LVHITTESTINFO
+        {
+            public POINT pt;
+            public uint flags;
+            public int iItem;
+            public int iSubItem;
+            public int reserved;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MOUSEINPUT
+        {
+            public int dx;
+            public int dy;
+            public uint mouseData;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KEYBDINPUT
+        {
+            public ushort wVk;
+            public ushort wScan;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct HARDWAREINPUT
+        {
+            public uint uMsg;
+            public ushort wParamL;
+            public ushort wParamH;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct INPUTUNION
+        {
+            [FieldOffset(0)] public MOUSEINPUT mi;
+            [FieldOffset(0)] public KEYBDINPUT ki;
+            [FieldOffset(0)] public HARDWAREINPUT hi;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct INPUT
+        {
+            public uint type;
+            public INPUTUNION u;
+        }
+
+        public const uint INPUT_MOUSE = 0;
+        public const uint MOUSEEVENTF_MOVE = 0x0001;
+        public const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
+        public const uint MOUSEEVENTF_LEFTUP = 0x0004;
+
+        public const uint LVM_GETITEMCOUNT = 0x1004;
+        public const uint LVM_GETITEMRECT = 0x100E;        // LVM_FIRST + 14
+        public const uint LVM_GETITEMPOSITION = 0x1010;    // LVM_FIRST + 16
+        public const uint LVM_GETNEXTITEM = 0x100C;        // LVM_FIRST + 12  (what the product uses by mistake)
+        public const uint LVM_SUBITEMHITTEST = 0x1039;     // LVM_FIRST + 57  (the real message)
+        public const uint LVM_GETHOTCURSOR = 0x103F;       // LVM_FIRST + 63  (what Native.cs:64 calls LVM_SUBHITTEST)
+        public const uint LVM_SUBHITTEST_AS_IN_PRODUCT = 0x103F;
+        public const uint LVM_GETITEMTEXTW = 0x1073;
+        public const uint LVIF_TEXT = 0x0001;
+        public const int LVIR_BOUNDS = 0;
+        public const int LVIR_ICON = 1;
+        public const int LVIR_LABEL = 2;
+
+        public const uint SMTO_ABORTIFHUNG = 0x0002;
+        public const uint SMTO_BLOCK = 0x0001;
+        public const uint GA_ROOT = 2;
+        public const uint GW_CHILD = 5;
+        public const uint GW_HWNDNEXT = 2;
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern IntPtr FindWindowW(string className, string windowName);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern IntPtr FindWindowExW(IntPtr parent, IntPtr childAfter, string className, string windowName);
+
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowVisible(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool IsWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern int GetClassNameW(IntPtr hWnd, StringBuilder text, int max);
+
+        [DllImport("user32.dll")]
+        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint pid);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetParent(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetAncestor(IntPtr hWnd, uint flags);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr WindowFromPoint(POINT pt);
+
+        [DllImport("user32.dll")]
+        public static extern bool ScreenToClient(IntPtr hWnd, ref POINT pt);
+
+        [DllImport("user32.dll")]
+        public static extern bool ClientToScreen(IntPtr hWnd, ref POINT pt);
+
+        [DllImport("user32.dll")]
+        public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
+
+        [DllImport("user32.dll")]
+        public static extern bool GetCursorPos(out POINT pt);
+
+        [DllImport("user32.dll")]
+        public static extern bool SetCursorPos(int x, int y);
+
+        [DllImport("user32.dll")]
+        public static extern int GetSystemMetrics(int index);
+
+        [DllImport("user32.dll")]
+        public static extern uint GetDoubleClickTime();
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern uint SendInput(uint n, INPUT[] inputs, int cbSize);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SendMessageW(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool PostMessageW(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern bool SendMessageTimeoutW(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam,
+            uint flags, uint timeoutMs, out IntPtr result);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr SetWindowsHookExW(int idHook, HookProc lpfn, IntPtr hMod, uint threadId);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        public static extern int GetMessageW(out MSG msg, IntPtr hWnd, uint min, uint max);
+
+        [DllImport("user32.dll")]
+        public static extern bool TranslateMessage(ref MSG msg);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr DispatchMessageW(ref MSG msg);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr LoadIconW(IntPtr hInstance, IntPtr name);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern IntPtr LoadCursorW(IntPtr hInstance, string name);
+
+        [DllImport("user32.dll")]
+        public static extern bool DestroyIcon(IntPtr hIcon);
+
+        [DllImport("user32.dll")]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        public static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetWindowLongPtrW(IntPtr hWnd, int index);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        public static extern IntPtr GetModuleHandleW(string name);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern IntPtr OpenProcess(uint access, bool inherit, uint pid);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr address, int size, uint type, uint protect);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr address, int size, uint type);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr baseAddress, byte[] buffer, int size, out int written);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr baseAddress, byte[] buffer, int size, out int read);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool CloseHandle(IntPtr handle);
+
+        [DllImport("user32.dll")]
+        public static extern bool SetProcessDPIAware();
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MSG
+        {
+            public IntPtr hwnd;
+            public uint message;
+            public IntPtr wParam;
+            public IntPtr lParam;
+            public uint time;
+            public POINT pt;
+        }
+
+        public delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+        // ---------- desktop topology ----------
+
+        public static string ClassNameOf(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero) return "";
+            StringBuilder sb = new StringBuilder(256);
+            int n = GetClassNameW(hWnd, sb, sb.Capacity);
+            if (n <= 0) return "";
+            return sb.ToString(0, n);
+        }
+
+        public static List<IntPtr> DesktopRoots()
+        {
+            List<IntPtr> roots = new List<IntPtr>();
+            IntPtr progman = FindWindowW("Progman", null);
+            if (progman != IntPtr.Zero) roots.Add(progman);
+            IntPtr w = IntPtr.Zero;
+            while (true)
+            {
+                w = FindWindowExW(IntPtr.Zero, w, "WorkerW", null);
+                if (w == IntPtr.Zero) break;
+                if (w != progman) roots.Add(w);
+            }
+            return roots;
+        }
+
+        public static List<IntPtr> DefViews()
+        {
+            List<IntPtr> found = new List<IntPtr>();
+            List<IntPtr> roots = DesktopRoots();
+            for (int i = 0; i < roots.Count; i++)
+            {
+                IntPtr child = IntPtr.Zero;
+                while (true)
+                {
+                    child = FindWindowExW(roots[i], child, "SHELLDLL_DefView", null);
+                    if (child == IntPtr.Zero) break;
+                    found.Add(child);
+                }
+            }
+            return found;
+        }
+
+        // "visible" / "hidden" / "none" - fully independent of the product
+        public static string IconsVisibility()
+        {
+            List<IntPtr> views = DefViews();
+            if (views.Count == 0) return "none";
+            return IsWindowVisible(views[0]) ? "visible" : "hidden";
+        }
+
+        public static string DefViewDetail()
+        {
+            List<IntPtr> views = DefViews();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < views.Count; i++)
+            {
+                if (i > 0) sb.Append(';');
+                sb.Append(views[i].ToInt64().ToString());
+                sb.Append('=');
+                sb.Append(IsWindowVisible(views[i]) ? "visible" : "hidden");
+            }
+            return sb.ToString();
+        }
+
+        // first SysListView32 that is a descendant of a SHELLDLL_DefView
+        public static IntPtr IconListView()
+        {
+            List<IntPtr> views = DefViews();
+            for (int i = 0; i < views.Count; i++)
+            {
+                IntPtr lv = FindListViewUnder(views[i]);
+                if (lv != IntPtr.Zero) return lv;
+            }
+            return IntPtr.Zero;
+        }
+
+        private static IntPtr FindListViewUnder(IntPtr root)
+        {
+            IntPtr node = IntPtr.Zero;
+            while (true)
+            {
+                node = FindWindowExW(root, node, null, null);
+                if (node == IntPtr.Zero) break;
+                if (ClassNameOf(node) == "SysListView32") return node;
+                IntPtr deep = FindListViewUnder(node);
+                if (deep != IntPtr.Zero) return deep;
+            }
+            return IntPtr.Zero;
+        }
+
+        public static string ChildClasses(IntPtr hWnd)
+        {
+            StringBuilder sb = new StringBuilder();
+            IntPtr node = IntPtr.Zero;
+            while (true)
+            {
+                node = FindWindowExW(hWnd, node, null, null);
+                if (node == IntPtr.Zero) break;
+                if (sb.Length > 0) sb.Append(',');
+                sb.Append(ClassNameOf(node));
+            }
+            return sb.ToString();
+        }
+
+        public static string RootClassAt(int x, int y)
+        {
+            POINT p = new POINT();
+            p.X = x;
+            p.Y = y;
+            IntPtr hit = WindowFromPoint(p);
+            IntPtr root = GetAncestor(hit, GA_ROOT);
+            return ClassNameOf(root) + "/" + ClassNameOf(hit);
+        }
+
+        public static IntPtr ProgmanHandle() { return FindWindowW("Progman", null); }
+
+        private static IntPtr _lv = IntPtr.Zero;
+        private static IntPtr _h = IntPtr.Zero;
+
+        public static int OpenDesktopListView()
+        {
+            _lv = IconListView();
+            if (_lv == IntPtr.Zero) return -1;
+            _h = RemoteOpen(_lv);
+            if (_h == IntPtr.Zero) return -2;
+            return 0;
+        }
+
+        public static void CloseDesktopListView()
+        {
+            if (_h != IntPtr.Zero) { CloseHandle(_h); _h = IntPtr.Zero; }
+        }
+
+        public static string ListViewHandle()
+        {
+            uint pid = 0;
+            GetWindowThreadProcessId(_lv, out pid);
+            return "lv=" + _lv + " pid=" + pid + " visible=" + IsWindowVisible(_lv) + " remote=" + _h;
+        }
+
+        public static int ItemCountNow() { return ItemCount(_lv); }
+
+        // one line per icon: index|name|screenX|screenY|w|h|centerX|centerY|subHitFlags@center
+        public static string[] CollectIcons()
+        {
+            List<string> lines = new List<string>();
+            int count = ItemCount(_lv);
+            lines.Add("count=" + count);
+            if (count <= 0) return lines.ToArray();
+            for (int i = 0; i < count; i++)
+            {
+                int[] r = ItemRectScreen(_lv, _h, i, LVIR_BOUNDS);
+                int[] pos = ItemPositionScreen(_lv, _h, i);
+                int[] hit = SubHitTest(_lv, _h, (r[1] + r[3]) / 2, (r[2] + r[4]) / 2);
+                string name = ItemText(_lv, _h, i);
+                lines.Add(i + "|" + name + "|" + r[1] + "," + r[2] + "," + (r[3] - r[1]) + "x" + (r[4] - r[2]) +
+                    "|c=" + ((r[1] + r[3]) / 2) + "," + ((r[2] + r[4]) / 2) +
+                    "|pos=" + pos[1] + "," + pos[2] +
+                    "|flags=" + hit[1] + "|item=" + hit[2]);
+            }
+            return lines.ToArray();
+        }
+
+        // Screen point that is (a) delivered to Progman/WorkerW, (b) outside every icon box
+        // inflated by pad, (c) LVM_SUBHITTEST reports no LVHT_ONITEM bit.
+        // returns { found, x, y, testedPoints }
+        public static int[] BlankPoint(int pad, int step)
+        {
+            int count = ItemCount(_lv);
+            List<int[]> boxes = new List<int[]>();
+            for (int i = 0; i < count; i++)
+            {
+                int[] r = ItemRectScreen(_lv, _h, i, LVIR_BOUNDS);
+                if (r[0] == 0) continue;
+                boxes.Add(new int[] { r[1] - pad, r[2] - pad, r[3] + pad, r[4] + pad });
+            }
+            int left = GetSystemMetrics(76), top = GetSystemMetrics(77);
+            int width = GetSystemMetrics(78), height = GetSystemMetrics(79);
+            int bestX = 0, bestY = 0, tested = 0, found = 0;
+            double bestScore = -1;
+            // walk a grid; prefer the candidate furthest from every icon box centre, tie-broken
+            // towards the middle of the screen (that is where a user naturally double-clicks)
+            for (int y = top + 40; y < top + height - 60; y += step)
+            {
+                for (int x = left + 40; x < left + width - 40; x += step)
+                {
+                    bool inBox = false;
+                    for (int i = 0; i < boxes.Count; i++)
+                    {
+                        int[] b = boxes[i];
+                        if (x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]) { inBox = true; break; }
+                    }
+                    if (inBox) continue;
+                    string report = PointReport(x, y, _lv);
+                    tested++;
+                    if (report.StartsWith("OK") == false) continue;
+                    int[] hit = SubHitTest(_lv, _h, x, y);
+                    if (hit[0] == 0 || (hit[1] & 0xE) != 0) continue;
+                    double dx = x - (left + width / 2.0);
+                    double dy = y - (top + height / 2.0);
+                    double score = 4000 - Math.Sqrt(dx * dx + dy * dy);
+                    if (score > bestScore) { bestScore = score; bestX = x; bestY = y; found = 1; }
+                }
+            }
+            return new int[] { found, bestX, bestY, tested, boxes.Count };
+        }
+
+        // "OK root=Progman hit=SysListView32 onDesktopList=1" or "NO root=Chrome..."
+        public static string PointReport(int x, int y, IntPtr desktopListView)
+        {
+            POINT p = new POINT();
+            p.X = x;
+            p.Y = y;
+            IntPtr hit = WindowFromPoint(p);
+            IntPtr root = GetAncestor(hit, GA_ROOT);
+            string rootClass = ClassNameOf(root);
+            bool rootOk = rootClass == "Progman" || rootClass == "WorkerW";
+            bool onList = false;
+            IntPtr node = hit;
+            for (int i = 0; i < 12 && node != IntPtr.Zero; i++)
+            {
+                if (node == desktopListView) { onList = true; break; }
+                node = GetParent(node);
+            }
+            return (rootOk ? "OK" : "NO") + " root=" + rootClass + " hit=" + ClassNameOf(hit) +
+                " onDesktopList=" + (onList ? 1 : 0);
+        }
+
+        public static int[] HitAt(int x, int y) { return SubHitTest(_lv, _h, x, y); }
+
+        // Whole-screen map: which pixels are actually delivered to Progman/WorkerW.
+        // Returns a multi-line report plus candidate blank points that also clear the icon boxes.
+        public static string FullScan(int step, int pad)
+        {
+            int count = ItemCount(_lv);
+            List<int[]> boxes = new List<int[]>();
+            for (int i = 0; i < count; i++)
+            {
+                int[] r = ItemRectScreen(_lv, _h, i, LVIR_BOUNDS);
+                if (r[0] == 0) continue;
+                boxes.Add(new int[] { r[1] - pad, r[2] - pad, r[3] + pad, r[4] + pad });
+            }
+            int left = GetSystemMetrics(76), top = GetSystemMetrics(77);
+            int width = GetSystemMetrics(78), height = GetSystemMetrics(79);
+            StringBuilder sb = new StringBuilder();
+            Dictionary<string, int> byRoot = new Dictionary<string, int>();
+            int clean = 0, total = 0;
+            List<string> candidates = new List<string>();
+            for (int y = top + 4; y < top + height; y += step)
+            {
+                for (int x = left + 4; x < left + width; x += step)
+                {
+                    total++;
+                    POINT p = new POINT();
+                    p.X = x;
+                    p.Y = y;
+                    IntPtr hit = WindowFromPoint(p);
+                    IntPtr root = GetAncestor(hit, GA_ROOT);
+                    string rc = ClassNameOf(root);
+                    bool rootOk = rc == "Progman" || rc == "WorkerW";
+                    if (!rootOk)
+                    {
+                        int cur;
+                        byRoot.TryGetValue(rc, out cur);
+                        byRoot[rc] = cur + 1;
+                        continue;
+                    }
+                    clean++;
+                    bool inBox = false;
+                    for (int i = 0; i < boxes.Count; i++)
+                    {
+                        int[] b = boxes[i];
+                        if (x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]) { inBox = true; break; }
+                    }
+                    if (!inBox && candidates.Count < 40) candidates.Add(x + "," + y);
+                }
+            }
+            sb.Append("grid_points=" + total + " reachable_desktop_points=" + clean +
+                " (" + (total == 0 ? 0 : (100 * clean / total)) + "% of screen)");
+            sb.AppendLine();
+            sb.Append("covered_by:");
+            foreach (KeyValuePair<string, int> kv in byRoot)
+            {
+                if (kv.Value * 200 < total) continue;
+                sb.Append(" " + kv.Key + "=" + kv.Value);
+            }
+            sb.AppendLine();
+            sb.Append("blank_candidates_outside_icon_boxes(" + pad + "px)=" + candidates.Count + ": ");
+            for (int i = 0; i < candidates.Count && i < 12; i++) sb.Append(candidates[i] + " ");
+            return sb.ToString();
+        }
+
+
+        // raw dump of what explorer answers for one item, using blocking SendMessageW
+        public static string DiagnoseItem(int index, int sx, int sy)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("lv=" + _lv + " class=" + ClassNameOf(_lv) + " item=" + index);
+            IntPtr posBlock = VirtualAllocEx(_h, IntPtr.Zero, 8, 0x1000 | 0x2000, 0x04);
+            int gle = Marshal.GetLastWin32Error();
+            sb.Append(" alloc=" + posBlock + " err=" + gle);
+            byte[] buf = new byte[8];
+            int wr;
+            bool w = WriteProcessMemory(_h, posBlock, buf, 8, out wr);
+            IntPtr r1 = SendMessageW(_lv, LVM_GETITEMPOSITION, new IntPtr(index), posBlock);
+            int rd;
+            ReadProcessMemory(_h, posBlock, buf, 8, out rd);
+            sb.Append(" GETITEMPOSITION ret=" + r1.ToInt64() + " wrote=" + w + " bytes=" + wr +
+                " read=" + rd + " val=" + ReadInt32(buf, 0) + "," + ReadInt32(buf, 4));
+            VirtualFreeEx(_h, posBlock, 0, 0x8000);
+
+            IntPtr rectBlock = VirtualAllocEx(_h, IntPtr.Zero, 16, 0x1000 | 0x2000, 0x04);
+            byte[] rb = new byte[16];
+            WriteProcessMemory(_h, rectBlock, rb, 16, out wr);
+            IntPtr r2 = SendMessageW(_lv, LVM_GETITEMRECT, new IntPtr(index), rectBlock);
+            ReadProcessMemory(_h, rectBlock, rb, 16, out rd);
+            sb.Append(" | GETITEMRECT(BLOCKS) ret=" + r2.ToInt64() + " rect=" + ReadInt32(rb, 0) + "," +
+                ReadInt32(rb, 4) + "," + ReadInt32(rb, 8) + "," + ReadInt32(rb, 12));
+            VirtualFreeEx(_h, rectBlock, 0, 0x8000);
+
+            IntPtr rectBlock2 = VirtualAllocEx(_h, IntPtr.Zero, 16, 0x1000 | 0x2000, 0x04);
+            byte[] rb2 = new byte[16];
+            WriteInt32(rb2, 0, 1); // LVIR_ICON
+            WriteProcessMemory(_h, rectBlock2, rb2, 16, out wr);
+            IntPtr r3 = SendMessageW(_lv, LVM_GETITEMRECT, new IntPtr(index), rectBlock2);
+            ReadProcessMemory(_h, rectBlock2, rb2, 16, out rd);
+            sb.Append(" | GETITEMRECT(ICON) ret=" + r3.ToInt64() + " rect=" + ReadInt32(rb2, 0) + "," +
+                ReadInt32(rb2, 4) + "," + ReadInt32(rb2, 8) + "," + ReadInt32(rb2, 12));
+            VirtualFreeEx(_h, rectBlock2, 0, 0x8000);
+
+            IntPtr hitBlock = VirtualAllocEx(_h, IntPtr.Zero, 24, 0x1000 | 0x2000, 0x04);
+            byte[] hb = new byte[24];
+            POINT client = new POINT();
+            client.X = sx;
+            client.Y = sy;
+            bool s2c = ScreenToClient(_lv, ref client);
+            WriteInt32(hb, 0, client.X);
+            WriteInt32(hb, 4, client.Y);
+            WriteProcessMemory(_h, hitBlock, hb, 24, out wr);
+            IntPtr r4 = SendMessageW(_lv, LVM_SUBITEMHITTEST, IntPtr.Zero, hitBlock);
+            ReadProcessMemory(_h, hitBlock, hb, 24, out rd);
+            sb.Append(" | SUBITEMHITTEST(0x1039) screen=" + sx + "," + sy + " client=" + client.X + "," + client.Y +
+                " s2c=" + s2c + " ret=" + r4.ToInt64() + " flags=" + ReadInt32(hb, 8) +
+                " iItem=" + ReadInt32(hb, 12) + " iSub=" + ReadInt32(hb, 16));
+            hb = new byte[24];
+            WriteInt32(hb, 0, client.X);
+            WriteInt32(hb, 4, client.Y);
+            WriteProcessMemory(_h, hitBlock, hb, 24, out wr);
+            IntPtr r5 = SendMessageW(_lv, LVM_SUBHITTEST_AS_IN_PRODUCT, IntPtr.Zero, hitBlock);
+            ReadProcessMemory(_h, hitBlock, hb, 24, out rd);
+            sb.Append(" | AS_PRODUCT(0x103F) ret=" + r5.ToInt64() + " flags=" + ReadInt32(hb, 8) +
+                " iItem=" + ReadInt32(hb, 12));
+            VirtualFreeEx(_h, hitBlock, 0, 0x8000);
+            return sb.ToString();
+        }
+
+        public static int[] ClientOfScreen(int x, int y)
+        {
+            POINT p = new POINT();
+            p.X = x;
+            p.Y = y;
+            bool ok = ScreenToClient(_lv, ref p);
+            return new int[] { ok ? 1 : 0, p.X, p.Y };
+        }
+
+        public static int[] RectAt(int index) { return ItemRectScreen(_lv, _h, index, LVIR_BOUNDS); }
+
+        [DllImport("user32.dll")]
+        public static extern bool EnumWindows(EnumWindowsProc cb, IntPtr lParam);
+
+        public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern int GetWindowTextW(IntPtr hWnd, StringBuilder text, int max);
+
+        [DllImport("user32.dll")]
+        public static extern bool Iconic(IntPtr hWnd);
+
+        // visible top-level windows with their rects, biggest first - so the report can show what
+        // already covers the desktop before any click is injected
+        public static string[] TopWindows()
+        {
+            _enumResult = new List<string>();
+            EnumWindows(OnEnum, IntPtr.Zero);
+            _enumResult.Sort();
+            return _enumResult.ToArray();
+        }
+
+        private static List<string> _enumResult;
+
+        private static bool OnEnum(IntPtr hWnd, IntPtr lParam)
+        {
+            if (!IsWindowVisible(hWnd)) return true;
+            RECT r;
+            if (!GetWindowRect(hWnd, out r)) return true;
+            if (r.Right - r.Left <= 4 || r.Bottom - r.Top <= 4) return true;
+            StringBuilder sb = new StringBuilder(256);
+            GetWindowTextW(hWnd, sb, sb.Capacity);
+            string title = sb.ToString();
+            if (title.Length > 28) title = title.Substring(0, 28);
+            long area = (long)(r.Right - r.Left) * (r.Bottom - r.Top);
+            _enumResult.Add((-area) + "|" + ClassNameOf(hWnd) + "|" + title + "|" +
+                r.Left + "," + r.Top + "," + r.Right + "," + r.Bottom);
+            return true;
+        }
+
+
+
+        public static IntPtr Progman() { return FindWindowW("Progman", null); }
+
+        public static string AncestorChain(IntPtr hWnd)
+        {
+            StringBuilder sb = new StringBuilder();
+            IntPtr node = hWnd;
+            for (int i = 0; i < 8 && node != IntPtr.Zero; i++)
+            {
+                if (sb.Length > 0) sb.Append(" <- ");
+                sb.Append(ClassNameOf(node));
+                node = GetParent(node);
+            }
+            return sb.ToString();
+        }
+
+        // ---------- remote memory ----------
+
+        public const uint PROCESS_VM = 0x0008 | 0x0010 | 0x0020 | 0x1000;
+
+        public static IntPtr RemoteOpen(IntPtr hWnd)
+        {
+            uint pid;
+            GetWindowThreadProcessId(hWnd, out pid);
+            return OpenProcess(PROCESS_VM, false, pid);
+        }
+
+        // ---------- list view queries (all cross-process, all independent) ----------
+
+        public static int ItemCount(IntPtr lv)
+        {
+            IntPtr r;
+            bool ok = SendMessageTimeoutW(lv, LVM_GETITEMCOUNT, IntPtr.Zero, IntPtr.Zero,
+                SMTO_ABORTIFHUNG, 2000, out r);
+            if (!ok) return -1;
+            return r.ToInt32();
+        }
+
+        // returns screen-space bounding box for item i; {0,0,0,0} on failure
+        public static int[] ItemRectScreen(IntPtr lv, IntPtr hProc, int index, int which)
+        {
+            RECT rect = new RECT();
+            rect.Left = which;
+            byte[] payload = new byte[16];
+            WriteInt32(payload, 0, rect.Left);
+            IntPtr remote = VirtualAllocEx(hProc, IntPtr.Zero, payload.Length, 0x1000 | 0x2000, 0x04);
+            if (remote == IntPtr.Zero) return new int[] { 0, 0, 0, 0, 0 };
+            int written;
+            if (!WriteProcessMemory(hProc, remote, payload, payload.Length, out written))
+            {
+                VirtualFreeEx(hProc, remote, 0, 0x8000);
+                return new int[] { 0, 0, 0, 0, 0 };
+            }
+            IntPtr result;
+            bool ok = SendMessageTimeoutW(lv, LVM_GETITEMRECT, new IntPtr(index), remote,
+                SMTO_ABORTIFHUNG, 2000, out result);
+            int read;
+            bool got = ReadProcessMemory(hProc, remote, payload, payload.Length, out read);
+            byte[] back = payload;
+            VirtualFreeEx(hProc, remote, 0, 0x8000);
+            if (!ok || !got) return new int[] { 0, 0, 0, 0, 0 };
+            POINT c = new POINT();
+            c.X = ReadInt32(back, 0);
+            c.Y = ReadInt32(back, 4);
+            ClientToScreen(lv, ref c);
+            POINT d = new POINT();
+            d.X = ReadInt32(back, 8);
+            d.Y = ReadInt32(back, 12);
+            ClientToScreen(lv, ref d);
+            return new int[] { 1, c.X, c.Y, d.X, d.Y };
+        }
+
+        // LVM_GETITEMPOSITION: wParam = index, lParam = POINT* (client coords)
+        public static int[] ItemPositionScreen(IntPtr lv, IntPtr hProc, int index)
+        {
+            byte[] payload = new byte[8];
+            IntPtr remote = VirtualAllocEx(hProc, IntPtr.Zero, payload.Length, 0x1000 | 0x2000, 0x04);
+            if (remote == IntPtr.Zero) return new int[] { 0, 0, 0 };
+            int written;
+            WriteProcessMemory(hProc, remote, payload, payload.Length, out written);
+            IntPtr result;
+            bool ok = SendMessageTimeoutW(lv, LVM_GETITEMPOSITION, new IntPtr(index), remote,
+                SMTO_ABORTIFHUNG, 2000, out result);
+            byte[] back = new byte[8];
+            int read;
+            bool got = ReadProcessMemory(hProc, remote, back, back.Length, out read);
+            VirtualFreeEx(hProc, remote, 0, 0x8000);
+            if (!ok || !got) return new int[] { 0, 0, 0 };
+            POINT c = new POINT();
+            c.X = ReadInt32(back, 0);
+            c.Y = ReadInt32(back, 4);
+            ClientToScreen(lv, ref c);
+            return new int[] { 1, c.X, c.Y };
+        }
+
+        // LVM_GETITEMTEXTW with a remote LVITEMW (mask = LVIF_TEXT)
+        public static string ItemText(IntPtr lv, IntPtr hProc, int index)
+        {
+            int itemSize = 64;
+            int textBytes = 1024;
+            IntPtr remote = VirtualAllocEx(hProc, IntPtr.Zero, itemSize + textBytes, 0x1000 | 0x2000, 0x04);
+            if (remote == IntPtr.Zero) return "";
+            byte[] item = new byte[itemSize];
+            WriteUInt32(item, 0, LVIF_TEXT);          // mask
+            WriteInt32(item, 4, index);               // iItem
+            WriteInt32(item, 8, 0);                   // iSubItem
+            WriteUInt32(item, 12, 0);                 // state
+            WriteUInt32(item, 16, 0);                 // stateMask
+            long textAddr = remote.ToInt64() + itemSize;
+            WriteInt64(item, 24, textAddr);           // pszText (offset 24 on x64)
+            WriteInt32(item, 32, textBytes / 2);      // cchTextMax
+            int written;
+            if (!WriteProcessMemory(hProc, remote, item, item.Length, out written))
+            {
+                VirtualFreeEx(hProc, remote, 0, 0x8000);
+                return "";
+            }
+            IntPtr result;
+            bool ok = SendMessageTimeoutW(lv, LVM_GETITEMTEXTW, new IntPtr(index), remote,
+                SMTO_ABORTIFHUNG, 2000, out result);
+            byte[] back = new byte[textBytes];
+            int read;
+            bool got = ReadProcessMemory(hProc, new IntPtr(textAddr), back, back.Length, out read);
+            VirtualFreeEx(hProc, remote, 0, 0x8000);
+            if (!ok || !got) return "";
+            return Encoding.Unicode.GetString(back, 0, back.Length).TrimEnd('\0');
+        }
+
+        // LVM_SUBITEMHITTEST (0x1039) with the exact same convention the product uses:
+        // screen point -> ScreenToClient -> remote LVHITTESTINFO -> flags
+        // returns { ok, flags, iItem, clientX, clientY }
+        public static int[] SubHitTest(IntPtr lv, IntPtr hProc, int screenX, int screenY)
+        {
+            return SubHitTestMsg(lv, hProc, screenX, screenY, LVM_SUBITEMHITTEST);
+        }
+
+        // same, but the caller picks the message id, so the product's 0x103F can be replayed verbatim
+        public static int[] SubHitTestMsg(IntPtr lv, IntPtr hProc, int screenX, int screenY, uint msgId)
+        {
+            POINT pt = new POINT();
+            pt.X = screenX;
+            pt.Y = screenY;
+            if (!ScreenToClient(lv, ref pt)) return new int[] { 0, -1, -1, 0, 0 };
+            byte[] item = new byte[24];
+            WriteInt32(item, 0, pt.X);
+            WriteInt32(item, 4, pt.Y);
+            IntPtr remote = VirtualAllocEx(hProc, IntPtr.Zero, item.Length, 0x1000 | 0x2000, 0x04);
+            if (remote == IntPtr.Zero) return new int[] { 0, -1, -1, pt.X, pt.Y };
+            int written;
+            if (!WriteProcessMemory(hProc, remote, item, item.Length, out written))
+            {
+                VirtualFreeEx(hProc, remote, 0, 0x8000);
+                return new int[] { 0, -1, -1, pt.X, pt.Y };
+            }
+            IntPtr result;
+            bool ok = SendMessageTimeoutW(lv, msgId, IntPtr.Zero, remote,
+                SMTO_ABORTIFHUNG, 2000, out result);
+            byte[] back = new byte[24];
+            int read;
+            bool got = ReadProcessMemory(hProc, remote, back, back.Length, out read);
+            VirtualFreeEx(hProc, remote, 0, 0x8000);
+            if (!ok || !got) return new int[] { 0, -1, -1, pt.X, pt.Y };
+            return new int[] { 1, ReadInt32(back, 8), ReadInt32(back, 12), pt.X, pt.Y };
+        }
+
+        // side-by-side at one point: real LVM_SUBITEMHITTEST vs the id Native.cs:64 sends
+        public static string HitCompare(int x, int y)
+        {
+            int[] a = SubHitTestMsg(_lv, _h, x, y, LVM_SUBITEMHITTEST);
+            int[] b = SubHitTestMsg(_lv, _h, x, y, LVM_SUBHITTEST_AS_IN_PRODUCT);
+            return "at " + x + "," + y +
+                " | real_0x1039 ok=" + a[0] + " flags=" + a[1] + " item=" + a[2] +
+                " guard_says_on_icon=" + (((a[1] & 0x000E) != 0) ? 1 : 0) +
+                " | product_0x103F ok=" + b[0] + " flags=" + b[1] + " item=" + b[2] +
+                " guard_says_on_icon=" + (((b[1] & 0x000E) != 0) ? 1 : 0);
+        }
+
+
+        public static int ReadInt32(byte[] b, int at) { return BitConverter.ToInt32(b, at); }
+        public static void WriteInt32(byte[] b, int at, int v) { byte[] x = BitConverter.GetBytes(v); Array.Copy(x, 0, b, at, 4); }
+        public static void WriteUInt32(byte[] b, int at, uint v) { byte[] x = BitConverter.GetBytes(v); Array.Copy(x, 0, b, at, 4); }
+        public static void WriteInt64(byte[] b, int at, long v) { byte[] x = BitConverter.GetBytes(v); Array.Copy(x, 0, b, at, 8); }
+
+        // ---------- input ----------
+
+        public static int InjectClicks(int count, uint downFlag, uint upFlag)
+        {
+            INPUT[] inputs = new INPUT[2];
+            inputs[0].type = INPUT_MOUSE;
+            inputs[0].u.mi.dwFlags = downFlag;
+            inputs[1].type = INPUT_MOUSE;
+            inputs[1].u.mi.dwFlags = upFlag;
+            int sent = 0;
+            for (int i = 0; i < count; i++)
+            {
+                uint r = SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+                sent += (int)r;
+            }
+            return sent;
+        }
+
+        // one left double click = DOWN UP DOWN UP, gap between the two clicks in ms
+        public static int InjectDoubleClick(int gapMs)
+        {
+            INPUT[] down = new INPUT[1];
+            down[0].type = INPUT_MOUSE;
+            down[0].u.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+            INPUT[] up = new INPUT[1];
+            up[0].type = INPUT_MOUSE;
+            up[0].u.mi.dwFlags = MOUSEEVENTF_LEFTUP;
+            int size = Marshal.SizeOf(typeof(INPUT));
+            int sent = 0;
+            sent += (int)SendInput(1, down, size);
+            sent += (int)SendInput(1, up, size);
+            if (gapMs > 0) System.Threading.Thread.Sleep(gapMs);
+            sent += (int)SendInput(1, down, size);
+            sent += (int)SendInput(1, up, size);
+            return sent;
+        }
+
+        // all four events in a single SendInput call (no gap at all)
+        public static int InjectDoubleClickBurst()
+        {
+            INPUT[] ev = new INPUT[4];
+            ev[0].type = INPUT_MOUSE;
+            ev[0].u.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+            ev[1].type = INPUT_MOUSE;
+            ev[1].u.mi.dwFlags = MOUSEEVENTF_LEFTUP;
+            ev[2].type = INPUT_MOUSE;
+            ev[2].u.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+            ev[3].type = INPUT_MOUSE;
+            ev[3].u.mi.dwFlags = MOUSEEVENTF_LEFTUP;
+            return (int)SendInput((uint)ev.Length, ev, Marshal.SizeOf(typeof(INPUT)));
+        }
+
+        public static int MoveMouseRelative(int dx, int dy)
+        {
+            INPUT[] mv = new INPUT[1];
+            mv[0].type = INPUT_MOUSE;
+            mv[0].u.mi.dx = dx;
+            mv[0].u.mi.dy = dy;
+            mv[0].u.mi.dwFlags = MOUSEEVENTF_MOVE;
+            return (int)SendInput(1, mv, Marshal.SizeOf(typeof(INPUT)));
+        }
+
+        public static int[] Cursor()
+        {
+            POINT p;
+            if (!GetCursorPos(out p)) return new int[] { 0, 0, 0 };
+            return new int[] { 1, p.X, p.Y };
+        }
+
+        public static IntPtr FindIpcWindow()
+        {
+            return FindWindowExW(new IntPtr(-3), IntPtr.Zero, null, "DesktopIconToggle.Ipc.v1");
+        }
+
+        // Reads the product's own WM_APP_PING flag bits over plain Win32 - used only as a
+        // diagnostic tie-breaker (instance alive / hook installed / two guards); the
+        // pass-fail judgements in this suite are made from IsWindowVisible(SHELLDLL_DefView).
+        // bit0 hook installed, bit1 gesture enabled, bit2 responds to injected clicks
+        public static string Ping()
+        {
+            IntPtr w = FindIpcWindow();
+            if (w == IntPtr.Zero) return "no-instance";
+            IntPtr r;
+            bool ok = SendMessageTimeoutW(w, 0x8002, IntPtr.Zero, IntPtr.Zero, SMTO_ABORTIFHUNG, 1000, out r);
+            if (!ok) return "instance-unresponsive";
+            long f = r.ToInt64();
+            return "flags=" + f + " hook=" + ((f & 1) != 0) + " gesture=" + ((f & 2) != 0) +
+                " injected=" + ((f & 4) != 0) + " hwnd=" + w;
+        }
+
+
+        [DllImport("user32.dll")]
+        public static extern bool PeekMessageW(out MSG msg, IntPtr hWnd, uint min, uint max, uint remove);
+
+        public const uint PM_REMOVE = 1;
+
+        // non-blocking pump: lets a low-level hook proc run without hanging the script
+        public static int PumpPeek(int milliseconds)
+        {
+            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+            int n = 0;
+            MSG m;
+            while (sw.ElapsedMilliseconds < milliseconds)
+            {
+                while (PeekMessageW(out m, IntPtr.Zero, 0, 0, PM_REMOVE))
+                {
+                    TranslateMessage(ref m);
+                    DispatchMessageW(ref m);
+                    n++;
+                }
+                System.Threading.Thread.Sleep(2);
+            }
+            return n;
+        }
+
+        // ---------- diagnostic low-level mouse hook ----------
+
+
+        private static IntPtr _hookHandle;
+        private static HookProc _hookDelegate;
+        private static List<string> _hookLines;
+        private static Dictionary<uint, int> _hookCounts;
+
+        public static bool StartMouseSpy()
+        {
+            _hookLines = new List<string>();
+            _hookCounts = new Dictionary<uint, int>();
+            _hookDelegate = new HookProc(OnMouse);
+            _hookHandle = SetWindowsHookExW(14, _hookDelegate, GetModuleHandleW(null), 0);
+            return _hookHandle != IntPtr.Zero;
+        }
+
+        private static IntPtr OnMouse(int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            if (nCode == 0 && _hookLines != null)
+            {
+                try
+                {
+                    uint id = (uint)wParam.ToInt64();
+                    byte[] raw = new byte[32];
+                    Marshal.Copy(lParam, raw, 0, raw.Length);
+                    int px = ReadInt32(raw, 0);
+                    int py = ReadInt32(raw, 4);
+                    uint flags = BitConverter.ToUInt32(raw, 12);
+                    int cur;
+                    if (_hookCounts == null) _hookCounts = new Dictionary<uint, int>();
+                    _hookCounts.TryGetValue(id, out cur);
+                    _hookCounts[id] = cur + 1;
+                    // WM_MOUSEMOVE is noise here; every button/wheel event is kept
+                    if (id != 0x0200 && _hookLines.Count < 600)
+                    {
+                        _hookLines.Add(DateTime.Now.ToString("HH:mm:ss.fff") + " msg=0x" + id.ToString("X4") +
+                            " pt=" + px + "," + py + " flags=0x" + flags.ToString("X") +
+                            (flags == 1 ? " [INJECTED]" : (flags == 0 ? " [hw]" : "")));
+                    }
+                }
+                catch (Exception) { }
+            }
+            return CallNextHookEx(_hookHandle, nCode, wParam, lParam);
+        }
+
+        public static string SpySummary()
+        {
+            if (_hookCounts == null) return "(spy not started)";
+            StringBuilder sb = new StringBuilder();
+            foreach (KeyValuePair<uint, int> kv in _hookCounts)
+            {
+                if (sb.Length > 0) sb.Append(' ');
+                sb.Append("0x" + kv.Key.ToString("X4") + "=" + kv.Value);
+            }
+            return "counts[" + sb + "] button_events=" + (_hookLines == null ? 0 : _hookLines.Count);
+        }
+
+        public static string[] SpyEvents()
+        {
+            if (_hookLines == null) return new string[0];
+            return _hookLines.ToArray();
+        }
+
+        // pump messages for the given ms so that the low level hook proc actually runs
+        public static int Pump(int milliseconds)
+        {
+            int n = 0;
+            DateTime until = DateTime.Now.AddMilliseconds(milliseconds);
+            while (DateTime.Now < until)
+            {
+                MSG msg;
+                int r = GetMessageW(out msg, IntPtr.Zero, 0, 0);
+                if (r == 0) break;
+                if (r < 0) break;
+                TranslateMessage(ref msg);
+                DispatchMessageW(ref msg);
+                n++;
+                if (msg.message == 0x0100) break; // VK_ESCAPE stops pumping
+            }
+            return n;
+        }
+
+        public static string[] StopMouseSpy()
+        {
+            if (_hookHandle != IntPtr.Zero) { UnhookWindowsHookEx(_hookHandle); _hookHandle = IntPtr.Zero; }
+            List<string> lines = _hookLines;
+            _hookLines = null;
+            _hookDelegate = null;
+            if (lines == null) return new string[0];
+            return lines.ToArray();
+        }
+
+        public static string[] SpyLinesSoFar()
+        {
+            if (_hookLines == null) return new string[0];
+            return _hookLines.ToArray();
+        }
+    }
+}

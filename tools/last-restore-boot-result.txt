@@ -1,0 +1,7 @@
+1) 以 --boot 起实例（模拟开机自启）：icons=visible 实例=1
+2) --hide 之后：icons=hidden
+3) 杀掉实例（模拟注销/重启）：icons=hidden
+4) 重新起实例：icons=hidden  期望=hidden  PASS
+   实例自述: flags      = hook_set=1 hook_saw_up=0 hook_paired_dblclk=0 gesture_on=1 accept_injected=1 restore_on_boot=1 diag       = ups=0 pairs=0 showwindow=0 dropped=0 toggle_failed=0
+5) 收尾恢复：icons=visible
+6) 不带 --boot 启动、且注册表记的是 hidden：icons=visible 期望=visible  PASS（没抢方向盘）

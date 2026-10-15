@@ -1,0 +1,125 @@
+// dependencies.dot - GENERATED from evidence.json by gen_dot.py; do not hand-edit.
+// Gate: verify_refs.py (resolves every citation against the real files),
+//      cross_check.py (this file must agree with evidence.json and the DSL).
+// Question this graph answers: what does each part of DesktopIconToggle.exe depend on,
+//      and which of those edges leave the process?
+// Reading order: cluster In-process components -> edge colour. Red = crosses into explorer's
+//      process. Green = a guard/timer that exists to protect the 300 ms hook timeout.
+//      Dashed = not an ordinary call (async, broadcast, or a read-only diagnostic).
+// Edge labels carry the evidence.json edge id, then the relationship type, then the citations,
+//      so any claim in this graph is checkable without opening the JSON.
+digraph DesktopIconToggle_Dependencies {
+  rankdir=TB;
+  graph [fontname="Segoe UI", fontsize=10, nodesep=0.42, ranksep=1.05,
+         compound=true, labelloc=t, pagesize="", dpi=110,
+         label="DesktopIconToggle - component dependency graph (current state, 2026-09-30)\ngenerated: system-modeler + graphviz  |  edges=52  nodes=24  verified citations=142"];
+  node [fontname="Segoe UI", fontsize=9];
+  edge [fontname="Consolas", fontsize=7, labeldistance=1.6, fontsize=7];
+
+  subgraph cluster_actors {
+    label="Actors\npeople and things outside the system that drive it";
+    style=rounded; color=#adb5bd; fontsize=11; margin=14;
+    "actor.user" [shape=ellipse, style="filled,bold", fillcolor="#cfe1f5", color="#2b2d42", label="Desktop user\nactor"];
+    "actor.script" [shape=ellipse, style="filled,bold", fillcolor="#cfe1f5", color="#2b2d42", label="Scripts / hotkeys / Task Scheduler\nactor"];
+    "actor.injected" [shape=ellipse, style="filled,bold", fillcolor="#cfe1f5", color="#2b2d42", label="Injected input (SendInput, remote control)\nactor"];
+  }
+
+  subgraph cluster_scope {
+    label="System boundary\nDesktopIconToggle.exe, run in one of two roles";
+    style=rounded; color=#adb5bd; fontsize=11; margin=14;
+    "sys.dit" [shape=box3d, style=filled, fillcolor="#f2cc8f", color="#7f5539", label="DesktopIconToggle\nsystem"];
+    "container.exe" [shape=box, style="rounded,filled,dashed", fillcolor="#fff3d6", color="#7f5539", label="DesktopIconToggle.exe\ncontainer"];
+    "proc.server" [shape=box, style="rounded,filled,dashed", fillcolor="#fff3d6", color="#7f5539", label="Background instance (server role)\ncontainer"];
+    "proc.cli" [shape=box, style="rounded,filled,dashed", fillcolor="#fff3d6", color="#7f5539", label="One-shot CLI invocation (client role)\ncontainer"];
+  }
+
+  subgraph cluster_app {
+    label="In-process components\nthe eight source files of the one assembly";
+    style=rounded; color=#adb5bd; fontsize=11; margin=14;
+    "comp.program" [shape=component, style=filled, fillcolor="#ffffff", color="#33415c", label="Program\nmodule"];
+    "comp.ipcwindow" [shape=component, style=filled, fillcolor="#ffffff", color="#33415c", label="IpcWindow\nmodule"];
+    "comp.gesturehook" [shape=component, style=filled, fillcolor="#ffffff", color="#33415c", label="DesktopGestureHook\nmodule"];
+    "comp.trayicon" [shape=component, style=filled, fillcolor="#ffffff", color="#33415c", label="TrayIcon\nmodule"];
+    "comp.desktop" [shape=component, style=filled, fillcolor="#ffffff", color="#33415c", label="Desktop\nmodule"];
+    "comp.remoteblock" [shape=component, style=filled, fillcolor="#ffffff", color="#33415c", label="RemoteBlock\nmodule"];
+    "comp.settings" [shape=component, style=filled, fillcolor="#ffffff", color="#33415c", label="Settings\nmodule"];
+    "comp.autostart" [shape=component, style=filled, fillcolor="#ffffff", color="#33415c", label="Autostart\nmodule"];
+    "comp.native" [shape=component, style=filled, fillcolor="#ffffff", color="#33415c", label="Native\nmodule"];
+  }
+
+  subgraph cluster_os {
+    label="Win32 subsystem\nreached only through the Native declaration surface";
+    style=rounded; color=#adb5bd; fontsize=11; margin=14;
+    "ext.user32" [shape=hexagon, style=filled, fillcolor="#ccd5ae", color="#3a5a40", label="user32.dll\nexternal-system"];
+    "ext.shell32" [shape=hexagon, style=filled, fillcolor="#ccd5ae", color="#3a5a40", label="shell32.dll\nexternal-system"];
+    "ext.kernel32" [shape=hexagon, style=filled, fillcolor="#ccd5ae", color="#3a5a40", label="kernel32.dll\nexternal-system"];
+    "ext.advapi32" [shape=hexagon, style=filled, fillcolor="#ccd5ae", color="#3a5a40", label="advapi32.dll\nexternal-system"];
+  }
+
+  subgraph cluster_shell {
+    label="Explorer (foreign process)\nthe app reaches into these windows";
+    style=rounded; color=#adb5bd; fontsize=11; margin=14;
+    "ext.explorer.desktop" [shape=hexagon, style=filled, fillcolor="#ccd5ae", color="#3a5a40", label="Explorer desktop window tree\nexternal-system"];
+    "ext.explorer.tray" [shape=hexagon, style=filled, fillcolor="#ccd5ae", color="#3a5a40", label="Explorer notification area\nexternal-system"];
+  }
+
+  subgraph cluster_store {
+    label="HKCU registry\nthe only persistence the app owns";
+    style=rounded; color=#adb5bd; fontsize=11; margin=14;
+    "store.hkcu.settings" [shape=cylinder, style=filled, fillcolor="#eab676", color="#9d0208", label="HKCU\Software\DesktopIconToggle\ndatabase"];
+    "store.hkcu.run" [shape=cylinder, style=filled, fillcolor="#eab676", color="#9d0208", label="HKCU\...\CurrentVersion\Run\ndatabase"];
+  }
+
+  "actor.user" -> "comp.gesturehook" [color="#33415c", penwidth=1.0, label="e.user-gesture\ntriggers | raw mouse input\nDesktopGestureHook.cs:87", labeltooltip="Double click on empty desktop reaches the low-level hook.", arrowsize=0.75, constraint=true];
+  "actor.injected" -> "comp.gesturehook" [color="#33415c", penwidth=1.0, label="e.injected-gesture\ntriggers | raw mouse input\nDesktopGestureHook.cs:22", labeltooltip="Synthetic events carry the injected bits and can be gated off by a setting.", arrowsize=0.75, constraint=true];
+  "actor.user" -> "comp.trayicon" [color="#33415c", penwidth=1.0, label="e.user-tray\noperates | shell notify callback\nProgram.cs:275  Program.cs:281", labeltooltip="Left double click toggles once, right button up opens the menu.", arrowsize=0.75, constraint=true];
+  "actor.script" -> "proc.cli" [color="#33415c", penwidth=1.0, label="e.script-cli\ninvokes | process spawn + argv\nProgram.cs:33  Program.cs:35", labeltooltip="One argv token selects the whole behaviour.", arrowsize=0.75, constraint=true];
+  "sys.dit" -> "container.exe" [color="#33415c", penwidth=1.0, label="e.dit-exe\ndeployed-as | single file\nDesktopIconToggle.csproj:6  README.md:5", labeltooltip="One framework-dependent single-file exe, no installer toolchain.", arrowsize=0.75, constraint=true];
+  "proc.server" -> "container.exe" [color="#33415c", penwidth=1.0, label="e-server-holds-components\nruns-as | in-process\nProgram.cs:62  Program.cs:99", labeltooltip="Server role is the long-lived process: mutex, message loop, hook, tray.", arrowsize=0.75, constraint=true];
+  "proc.cli" -> "container.exe" [color="#33415c", penwidth=1.0, label="e-cli-holds-components\nruns-as | in-process\nProgram.cs:32", labeltooltip="Client role exits after one command.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "comp.ipcwindow" [color="#33415c", penwidth=1.0, label="e.program-ipcwindow\ndepends-on | in-process call\nProgram.cs:79  Program.cs:71", labeltooltip="Creates the window, posts to it, queries it, disposes it.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "comp.gesturehook" [color="#33415c", penwidth=1.0, label="e.program-hook\ndepends-on | in-process call\nProgram.cs:87", labeltooltip="Installs the hook and reads its diagnostic counters.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "comp.trayicon" [color="#33415c", penwidth=1.0, label="e.program-tray\ndepends-on | in-process call\nProgram.cs:88  Program.cs:175", labeltooltip="Creates the tray icon and drives the bounded re-arm retries.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "comp.desktop" [color="#33415c", penwidth=1.0, label="e.program-desktop\ndepends-on | in-process call\nProgram.cs:275  Program.cs:319  Program.cs:344\nProgram.cs:142", labeltooltip="Every visibility read, write, point classification, and hit test.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "comp.settings" [color="#33415c", penwidth=1.0, label="e.program-settings\nreads | in-process call\nProgram.cs:383  Program.cs:125", labeltooltip="Single read funnel (SettingIsOn) plus menu writes.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "comp.autostart" [color="#33415c", penwidth=1.0, label="e.program-autostart\ndepends-on | in-process call\nProgram.cs:96  Program.cs:625", labeltooltip="Self-heal at startup, set/read from menu and CLI.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "comp.native" [color="#33415c", penwidth=1.0, label="e.program-native\ndepends-on | in-process call\nProgram.cs:99  Program.cs:149", labeltooltip="Message loop, timers, console attach, message constants.", arrowsize=0.75, constraint=true];
+  "comp.gesturehook" -> "comp.ipcwindow" [color="#3a5a40", penwidth=2.0, label="e.hook-ipcwindow\npublishes | PostMessage (in-process)\nDesktopGestureHook.cs:90", labeltooltip="Hand-off off the hook thread; the callback itself does no heap work.", arrowsize=0.75, constraint=true];
+  "comp.gesturehook" -> "comp.native" [color="#33415c", penwidth=1.0, label="e.hook-native\ndepends-on | in-process call\nDesktopGestureHook.cs:52  DesktopGestureHook.cs:44", labeltooltip="Hook install/uninstall, double-click time and rect metrics.", arrowsize=0.75, constraint=true];
+  "comp.ipcwindow" -> "comp.native" [color="#33415c", penwidth=1.0, label="e.ipcwindow-native\ndepends-on | in-process call\nIpcWindow.cs:34  IpcWindow.cs:41  IpcWindow.cs:109", labeltooltip="Class registration, window creation, discovery, send/post.", arrowsize=0.75, constraint=true];
+  "comp.trayicon" -> "comp.native" [color="#33415c", penwidth=1.0, label="e.tray-native\ndepends-on | in-process call\nTrayIcon.cs:39  TrayIcon.cs:60", labeltooltip="Notify icon adds/updates/deletes and icon extraction.", arrowsize=0.75, constraint=true];
+  "comp.desktop" -> "comp.native" [color="#33415c", penwidth=1.0, label="e.desktop-native\ndepends-on | in-process call\nDesktop.cs:39  Desktop.cs:165", labeltooltip="Enumeration, visibility, hit test, remote memory.", arrowsize=0.75, constraint=true];
+  "comp.settings" -> "comp.native" [color="#33415c", penwidth=1.0, label="e.settings-native\ndepends-on | in-process call\nSettings.cs:43  Settings.cs:60", labeltooltip="Registry get/create/set/close.", arrowsize=0.75, constraint=true];
+  "comp.autostart" -> "comp.native" [color="#33415c", penwidth=1.0, label="e.autostart-native\ndepends-on | in-process call\nAutostart.cs:34  Autostart.cs:57", labeltooltip="Registry open/set/delete/close on the Run key.", arrowsize=0.75, constraint=true];
+  "comp.desktop" -> "comp.settings" [color="#588157", penwidth=1.8, label="e.desktop-settings\nwrites | in-process call\nDesktop.cs:86  Desktop.cs:106", labeltooltip="Records last visibility state on every real change, so it survives reboot.", arrowsize=0.75, constraint=true];
+  "comp.desktop" -> "comp.remoteblock" [color="#d62828", penwidth=2.2, label="e.desktop-remoteblock\ndepends-on | in-process call\nDesktop.cs:202  Desktop.cs:213  Desktop.cs:216", labeltooltip="Allocates the LVHITTESTINFO scratch inside explorer, writes, reads back, frees.", arrowsize=0.75, constraint=true];
+  "comp.native" -> "ext.user32" [color="#33415c", penwidth=1.0, label="e.native-user32\ndepends-on | P/Invoke\nNative.cs:290", labeltooltip="41 declarations.", arrowsize=0.75, constraint=true];
+  "comp.native" -> "ext.shell32" [color="#33415c", penwidth=1.0, label="e.native-shell32\ndepends-on | P/Invoke\nNative.cs:370", labeltooltip="2 declarations.", arrowsize=0.75, constraint=true];
+  "comp.native" -> "ext.kernel32" [color="#33415c", penwidth=1.0, label="e.native-kernel32\ndepends-on | P/Invoke\nNative.cs:379", labeltooltip="12 declarations.", arrowsize=0.75, constraint=true];
+  "comp.native" -> "ext.advapi32" [color="#33415c", penwidth=1.0, label="e.native-advapi32\ndepends-on | P/Invoke\nNative.cs:437", labeltooltip="6 declarations.", arrowsize=0.75, constraint=true];
+  "comp.desktop" -> "ext.explorer.desktop" [color="#d62828", penwidth=2.6, label="e.desktop-showhide\nwrites | ShowWindowAsync on foreign HWND\nDesktop.cs:91  Desktop.cs:96", labeltooltip="The actual toggle primitive, deliberately async so a hung explorer cannot stall the hook thread.", arrowsize=0.75, constraint=true];
+  "comp.remoteblock" -> "ext.explorer.desktop" [color="#d62828", penwidth=2.2, label="e.desktop-hittest\ncalls | SendMessageTimeoutW LVM_SUBITEMHITTEST, 150 ms\nDesktop.cs:165", labeltooltip="Asks explorer's list view whether the point is on an item.", arrowsize=0.75, constraint=true];
+  "comp.desktop" -> "ext.explorer.desktop" [color="#33415c", penwidth=1.0, label="e.desktop-readstate\nreads | IsWindowVisible\nDesktop.cs:70", labeltooltip="State is never cached; re-queried every call.", arrowsize=0.75, constraint=true];
+  "comp.trayicon" -> "ext.explorer.tray" [color="#33415c", penwidth=1.0, label="e.tray-explorer\nregisters-with | Shell_NotifyIconW\nTrayIcon.cs:39  TrayIcon.cs:46", labeltooltip="NIM_ADD, NIM_SETVERSION v4, NIM_DELETE.", arrowsize=0.75, constraint=true];
+  "ext.explorer.tray" -> "comp.program" [color="#3a5a40", penwidth=2.0, style=dashed, label="e.taskbarcreated\npublishes | RegisterWindowMessageW broadcast\nProgram.cs:199  Native.cs:42", labeltooltip="Shell restart invalidates the registration; the handler re-arms with a bounded retry.", arrowsize=0.75, constraint=true];
+  "comp.settings" -> "store.hkcu.settings" [color="#33415c", penwidth=1.0, label="e.settings-store\nreads-writes | registry\nSettings.cs:12", labeltooltip="REG_DWORD only; deleting the key restores defaults.", arrowsize=0.75, constraint=true];
+  "comp.settings" -> "store.hkcu.settings" [color="#33415c", penwidth=1.0, label="e-desktop-writes-state\nreads-writes | registry\nSettings.cs:33", labeltooltip="Last icon visibility is persisted here by Desktop, not by Program.", arrowsize=0.75, constraint=true];
+  "comp.autostart" -> "store.hkcu.run" [color="#33415c", penwidth=1.0, label="e.autostart-store\nreads-writes | registry\nAutostart.cs:52  Autostart.cs:99", labeltooltip="One REG_SZ; self-heal only rewrites a path whose file is gone.", arrowsize=0.75, constraint=true];
+  "proc.cli" -> "proc.server" [color="#9d0208", penwidth=2.2, style=dashed, label="e.cli-server-discover\ncalls | FindWindowExW by class+title, SendMessageTimeoutW 1000 ms / PostMessageW\nIpcWindow.cs:77  IpcWindow.cs:97  IpcWindow.cs:109\nProgram.cs:635", labeltooltip="Discovery verifies the owning exe path, so a decoy window with the same title is not trusted. Queries are synchronous with a timeout; --exit is fire-and-forget.", arrowsize=0.75, constraint=true];
+  "proc.cli" -> "comp.desktop" [color="#33415c", penwidth=1.0, label="e.cli-direct-desktop\ncalls | in-process call\nProgram.cs:529  Program.cs:537  README.md:35", labeltooltip="--toggle/--show/--hide do not need the background instance; README states this on purpose so the CLI is always an escape hatch.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "comp.program" [color="#588157", penwidth=1.8, label="e.bootrestore-timer\nself-loop | WM_TIMER id 0xB007, 2000 ms, max 10 retries, always killed\nProgram.cs:115  Program.cs:149  Program.cs:146", labeltooltip="Boot restore retries until explorer builds the icon layer, then kills the timer.", arrowsize=0.75, constraint=false];
+  "comp.native" -> "comp.program" [color="#33415c", penwidth=1.0, label="e.wmapp-protocol\nsupplies | constant declarations\nNative.cs:21  Native.cs:24  Native.cs:27\nNative.cs:30  Native.cs:33  Native.cs:35\nNative.cs:36", labeltooltip="The WM_APP protocol the two roles speak: ping, gesture hand-off, icon-test return, two stat channels, quit. Values are fixed, not runtime-allocated, except TaskbarCreated which is dynamic by design.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "comp.program" [color="#588157", penwidth=1.8, label="e.gesture-throttle\nself-loop | in-process guard\nProgram.cs:312  Program.cs:350", labeltooltip="100 ms floor on the decision path. Not politeness: a queued backlog pushes the hook past LowLevelHooksTimeout (300 ms), which makes the whole system's mouse stutter and silently removes the hook while hook_set still reports 1.", arrowsize=0.75, constraint=false];
+  "comp.program" -> "comp.program" [color="#588157", penwidth=1.8, label="e.gesture-inflight\nself-loop | Interlocked\nProgram.cs:332", labeltooltip="Exactly one hit test may be outstanding. The only concurrency primitive in the app, and drops are counted rather than silently swallowed.", arrowsize=0.75, constraint=false];
+  "comp.program" -> "comp.desktop" [color="#33415c", penwidth=1.0, label="e.gesture-worker\ncalls | ThreadPool work item, result posted back as WM_APP_ICON_TEST\nProgram.cs:341  Program.cs:346  Program.cs:325", labeltooltip="Deliberate offload: the message thread does cheap checks only (point classification, style bit); anything that sends to explorer moves off it.", arrowsize=0.75, constraint=true];
+  "comp.desktop" -> "ext.explorer.desktop" [color="#33415c", penwidth=1.0, label="e.desktop-point\nreads | WindowFromPoint / GetAncestor / GetParent / style bit\nDesktop.cs:119  Desktop.cs:128  Desktop.cs:138", labeltooltip="Decides whether a screen point is the desktop itself, and returns the icon list under it. Read from the message thread, so no cross-process send here.", arrowsize=0.75, constraint=true];
+  "comp.desktop" -> "ext.explorer.desktop" [color="#d62828", penwidth=2.6, label="e.desktop-hittest-detail\ncalls | LVM_SUBITEMHITTEST via SendMessageTimeoutW, 150 ms, abort-if-hung\nDesktop.cs:149  Desktop.cs:152  Desktop.cs:154\nDesktop.cs:165", labeltooltip="Asks explorer's list view for the item at a client point. Client coordinates are converted first; the pid check exists because a DefView can belong to a different process than expected.", arrowsize=0.75, constraint=true];
+  "comp.gesturehook" -> "ext.user32" [color="#33415c", penwidth=1.0, label="e.hook-chains\ncalls | CallNextHookEx\nDesktopGestureHook.cs:99  DesktopGestureHook.cs:46", labeltooltip="Every event is chained on. The gesture never consumes the click, so double-clicking an icon still launches the program normally.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "comp.gesturehook" [color="#33415c", penwidth=1.0, label="e.hook-uninstall\ndepends-on | in-process call\nProgram.cs:107  DesktopGestureHook.cs:105", labeltooltip="Loop exit disposes hook, window, tray in that order; a leaked global hook would outlive the intent.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "comp.desktop" [color="#588157", penwidth=1.8, label="e.endsession-persist\nwrites | in-process call at WM_QUERYENDSESSION\nProgram.cs:234", labeltooltip="Re-reads the REAL visibility at session end and stores it, so a change made through explorer's own right-click menu is not lost at reboot.", arrowsize=0.75, constraint=true];
+  "comp.program" -> "ext.user32" [color="#33415c", penwidth=1.0, label="e.menu-blocks\ncalls | TrackPopupMenuEx (blocking)\nProgram.cs:474", labeltooltip="Menu tracking blocks the message thread by design; this is also why WM_CLOSE is ignored - the system sends it to the menu owner while tracking.", arrowsize=0.75, constraint=true];
+  "proc.cli" -> "proc.server" [color="#9d0208", penwidth=2.0, style=dashed, label="e.status-diag\nreads | three read-only WM_APP stat channels\nProgram.cs:545  Program.cs:559  Program.cs:568\nProgram.cs:398  Program.cs:407  Program.cs:444", labeltooltip="Graded self-report instead of one health boolean: hook installed vs callback actually fired vs a double click was paired vs ShowWindow actually ran vs dropped. Two outages this session were 'looks fine, does nothing' and only the graded counters localised them.", arrowsize=0.75, constraint=true];
+  "comp.ipcwindow" -> "ext.kernel32" [color="#33415c", penwidth=1.0, label="e.ipc-identity\ncalls | OpenProcess + QueryFullProcessImageNameW\nIpcWindow.cs:15  IpcWindow.cs:52  IpcWindow.cs:91", labeltooltip="Instance discovery matches class AND title, then confirms the owning exe path. Title alone would let any foreign window receive --exit.", arrowsize=0.75, constraint=true];
+  "comp.settings" -> "ext.advapi32" [color="#33415c", penwidth=1.0, label="e.settings-create\nwrites | RegCreateKeyExW / RegSetValueExW\nSettings.cs:55", labeltooltip="Create-on-write, no installer step; deleting the key is the documented way back to defaults.", arrowsize=0.75, constraint=true];
+  "comp.trayicon" -> "ext.shell32" [color="#33415c", penwidth=1.0, label="e.tray-teardown\nwrites | NIM_DELETE + DestroyIcon\nTrayIcon.cs:76  TrayIcon.cs:79", labeltooltip="Registration is removed on dispose; icon handles extracted for use are destroyed. Both matter - a leaked registration leaves a dead ghost icon in the shell.", arrowsize=0.75, constraint=true];
+}

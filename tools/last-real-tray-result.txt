@@ -1,0 +1,7 @@
+实例=1  icons=visible  ups=4 pairs=2 showwindow=2 dropped=0 toggle_failed=0
+找到图标：名字=[桌面图标开关｜双击桌面空白处 = 显示/隐藏桌面图标] 中心=(1642,1173)
+左键双击图标：注入事件=4  icons visible -> hidden  实例=1  ups=6 pairs=3 showwindow=3 dropped=0 toggle_failed=0
+再双击：注入事件=4  icons hidden -> visible  实例=1  ups=8 pairs=4 showwindow=4 dropped=0 toggle_failed=0
+右键：实例=1  截图 crop-real-tray-menu.png (取自 1460,827)  ups=8 pairs=4 showwindow=4 dropped=0 toggle_failed=0
+Esc 之后：实例=1  icons=visible
+结论：PASS —— 托盘左键双击可切换、右键不再自杀

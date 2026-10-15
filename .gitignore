@@ -1,0 +1,21 @@
+# 构建产物（build.ps1 生成）
+bin/
+obj/
+dist/
+
+# 这台机器上跑出来的原始日志：里面有本机用户名、绝对用户路径、机器本地 SID。
+# 关键读数已经写进 TEST-REPORT.md 正文，原始 chatter 只留在本地，不进公开仓库。
+*.log
+boot-expect.txt
+run-*.err
+
+# 桌面截图：拍到壁纸/图标/托盘菜单，属于个人环境内容
+shots/
+
+# PowerShell profile 被拒载那件事的取证与修复记录（含域账户名与 SID，与本项目无关）
+PROFILE-FIX-20261009.md
+profile-acl-rollback.txt
+
+# Python 字节码缓存（architecture 文档生成时留下的）
+__pycache__/
+*.pyc
